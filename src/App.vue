@@ -10,7 +10,7 @@ const grid = ref([]);
 onMounted(async () => {
   grid.value = await invoke("create_queens_game", { gridSize });
 });
-
+// TODO generate the colours RANDOMLY else you can figure out just from the colours  
   const colourMap = {
   0: "#ffffff",
   1: "#ffadad",

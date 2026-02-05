@@ -1,6 +1,7 @@
 use std::vec;
 
 use rand::seq::SliceRandom;
+use std::collections::HashSet;
 use rand::{Rng, rng};
 
 pub fn generate_grid(grid_size: u32) -> Vec<u32> {
@@ -56,7 +57,7 @@ fn is_valid(grid: &Vec<u32>, row: u32, col: u32, size: u32) -> bool {
 }
 
 
-pub fn colour_cell(colour_grid: &Vec<u32>, queue: &mut Vec<(u32, u32)>, row: u32, col: u32, size: u32) {
+pub fn colour_cell(colour_grid: &Vec<u32>, queue: &mut Vec<(u32, u32)>, seen: &mut HashSet<(u32, u32)>, row: u32, col: u32, size: u32) {
     let row = row as i32;
     let col = col as i32;
     let size = size as i32;
@@ -70,13 +71,18 @@ pub fn colour_cell(colour_grid: &Vec<u32>, queue: &mut Vec<(u32, u32)>, row: u32
         if r >= 0 && r < size && c >= 0 && c < size {
             let idx = (r * size + c) as usize;
             if colour_grid[idx] == 0 {
-                queue.push((r as u32, c as u32)); 
+                push_if_not_seen(queue, seen, r as u32, c as u32)
+                
             }
         }
     }
 }
 
-
+fn push_if_not_seen(queue: &mut Vec<(u32, u32)>, seen: &mut HashSet<(u32, u32)>, row: u32, col: u32){
+    if seen.insert((row, col)) {
+        queue.push((row, col));
+    }
+}
 pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> u32{
     let row = row as i32;
     let col = col as i32;
@@ -103,3 +109,15 @@ pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> u3
     return colours[idx];
 }
 
+pub fn print_grid(grid: &Vec<u32>, size: u32){
+    println!();
+    for r in 0..size {
+        for c in 0..size {
+            print!(
+                "{} ",
+                grid[(r * size + c) as usize]
+            );
+        }
+        println!();
+    }
+}
