@@ -1,44 +1,20 @@
 <script setup lang="ts">
   import { ref, onMounted } from "vue";
   import { invoke } from "@tauri-apps/api/core";
+  import QueenIcon from "./components/icons/QueenIcon.vue";
 
 
-  const gridSize = 8;
-
-const grid = ref([]);
-
-onMounted(async () => {
-  grid.value = await invoke("create_queens_game", { gridSize });
-});
-// TODO generate the colours RANDOMLY else you can figure out just from the colours  
-  const colourMap = {
-  0: "#ffffff",
-  1: "#ffadad",
-  2: "#ffd6a5",
-  3: "#fdffb6",
-  4: "#caffbf",
-  5: "#9bf6ff",
-  6: "#a0c4ff",
-  7: "#bdb2ff",
-  8: "#ffc6ff"
-};
 
 </script>
 
 <template>
   <div class="background">
-    <div class="square">
-      <div
-        class="grid"
-        :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }"
-      >
-        <div
-          v-for="(cell, i) in grid"
-          :key="i"
-          class="cell"
-          :style="{ backgroundColor: colourMap[cell] }"
-        />
-      </div>
+    <div class="QueenSquare">
+
+     <!-- style="position:absolute; top:-34px; left: 3px;"> -->
+      <svg viewBox="0 0 32 22" height="min(6vw, 6vh)" width="min(6vw, 6vh)" y="1em">
+      <QueenIcon></QueenIcon>
+      </svg>
     </div>
   </div>
 </template>
@@ -52,27 +28,93 @@ onMounted(async () => {
 
   width: 100vw;
   height: 100vh;
-
-  background-color: white;
+  animation-duration: 60s;
+  animation-name: rotate-hue;
+  animation-iteration-count: infinite;
 }
 
-.square {
-  display: block;
+
+.QueenSquare{
+  display: flex;
   justify-content: center;
   align-items: center;
   background-color: #FDD7FF;
+  width: min(10vh,10vw);
+  height: min(10vh,10vw);
+  border: 4px solid #000000;
+  border-radius: 20%;
+  top:4px; 
+  left:30px;
 
-  width: min(90vw, 90vh);
-  aspect-ratio: 1 / 1;
+  animation-duration: 6s;
+  animation-name: appear-and-dissappear;
+  animation-iteration-count: infinite;
+}
+@keyframes appear-and-dissappear {
+  0%{
+    opacity: 0;
+  }
+  50%{
+    opacity: 100;
+  }
+  75%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 0;
+  }
 }
 
-.grid{
-  display: grid;
-  width: 100%;
-  height: 100%;
+
+@keyframes rotate-hue {
+  0% {
+    background-color: oklch(0.7 0.9 0);
+  }
+  10% {
+    background-color: oklch(0.8 0.5 36);
+  }
+  20% {
+    background-color: oklch(0.9 0.5 72);
+  }
+
+  30% {
+    background-color: oklch(0.7 0.9 108);
+
+  }
+  40% {
+    background-color: oklch(0.7 0.9 144);
+
+  }
+  50% {
+    background-color: oklch(0.7 0.9 180);
+
+  }
+  60%{
+    background-color: oklch(0.7 0.9 216);
+
+  }
+  70% {
+    background-color: oklch(0.7 0.9 252);
+
+  }
+  80% {
+    background-color: oklch(0.7 0.9 288);
+
+  }
+  90% {
+    background-color: oklch(0.7 0.9 324);
+
+  }
+  100%{
+    background-color: oklch(0.7 0.9 360);
+
+  }
 }
-.cell{
-  aspect-ratio: 1 / 1;
+
+
+
+
+body{margin:0px;
 }
 </style>
 
