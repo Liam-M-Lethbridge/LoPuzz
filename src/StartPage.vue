@@ -1,7 +1,5 @@
 <script setup lang="ts">
-  import { ref, onMounted } from "vue";
-  import { invoke } from "@tauri-apps/api/core";
-  import QueenIcon from "./components/icons/QueenIcon.vue";
+  import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
 
   const router = useRouter();
@@ -14,13 +12,7 @@
 <template>
   <button style="padding:0;border:0;" @click="startUp">
     <div class="background">
-      <div class="QueenSquare">
-
-      <!-- style="position:absolute; top:-34px; left: 3px;"> -->
-        <svg viewBox="0 0 32 22" height="min(6vw, 6vh)" width="min(6vw, 6vh)" y="1em">
-        <QueenIcon></QueenIcon>
-        </svg>
-      </div>
+      <QueenBox style="width: min(10vh,10vw); height: min(10vh,10vw);"></QueenBox>
     </div>
   </button>
 </template>
@@ -41,21 +33,7 @@
 }
 
 
-.QueenSquare{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #FDD7FF;
-  width: min(10vh,10vw);
-  height: min(10vh,10vw);
-  border: 4px solid #000000;
-  border-radius: 20%;
-  top:4px; 
-  left:30px;
-  animation-duration: 6s;
-  animation-name: appear-and-dissappear;
-  animation-iteration-count: infinite;
-}
+
 @keyframes appear-and-dissappear {
   0%{
     opacity: 0;

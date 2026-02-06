@@ -1,45 +1,25 @@
 <script setup lang="ts">
   import { ref, onMounted } from "vue";
   import { invoke } from "@tauri-apps/api/core";
+  import QueenBox from "./components/icons/QueenBox.vue";
+  import { useRouter } from "vue-router";
 
   const gridSize = 8;
-
-const grid = ref([]);
-
+  const hover = ref(false);
+  const grid = ref([]);
+  const router = useRouter();
+  function toGame(game:string){
+    router.push(game);
+  }
 onMounted(async () => {
   grid.value = await invoke("create_queens_game", { gridSize });
 });
-
-// TODO generate the colours RANDOMLY else you can figure out just from the colours  
-  const colourMap = {
-  0: "#ffffff",
-  1: "#ffadad",
-  2: "#ffd6a5",
-  3: "#fdffb6",
-  4: "#caffbf",
-  5: "#9bf6ff",
-  6: "#a0c4ff",
-  7: "#bdb2ff",
-  8: "#ffc6ff"
-};
 
 </script>
 
 <template>
   <div class="background">
-    <div class="square">
-      <div
-        class="grid"
-        :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }"
-      >
-        <div
-          v-for="(cell, i) in grid"
-          :key="i"
-          class="cell"
-          :style="{ backgroundColor: colourMap[cell] }"
-        />
-      </div>
-    </div>
+      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
   </div>
 </template>
 
@@ -53,17 +33,11 @@ onMounted(async () => {
   width: 100vw;
   height: 100vh;
 
-  background-color: white;
+  /* background-color: white; */
+  background: linear-gradient(#223d75,#193e8f)
 }
-
-.square {
-  display: block;
-  justify-content: center;
-  align-items: center;
-  background-color: #FDD7FF;
-
-  width: min(90vw, 90vh);
-  aspect-ratio: 1 / 1;
+.QueenSquare:hover{
+  background-color: #dca8e0;;
 }
 
 .grid{
