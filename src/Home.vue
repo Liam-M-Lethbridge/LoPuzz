@@ -4,6 +4,7 @@
   import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
 
+
   const gridSize = 8;
   const hover = ref(false);
   const grid = ref([]);

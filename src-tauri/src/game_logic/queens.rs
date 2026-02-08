@@ -83,6 +83,7 @@ fn push_if_not_seen(queue: &mut Vec<(u32, u32)>, seen: &mut HashSet<(u32, u32)>,
         queue.push((row, col));
     }
 }
+
 pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> u32{
     let row = row as i32;
     let col = col as i32;
@@ -120,4 +121,18 @@ pub fn print_grid(grid: &Vec<u32>, size: u32){
         }
         println!();
     }
+}
+
+pub fn check_grids(grid1: Vec<u32>, grid2: Vec<u32>) -> bool{
+
+    if grid1.len() != grid2.len(){
+        return false;
+    }
+
+    for i in 0..grid1.len(){
+        if grid1[i] != grid2[i]{
+            return false;
+        }
+    }
+    return true;
 }

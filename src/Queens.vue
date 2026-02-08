@@ -2,7 +2,10 @@
   import { ref, onMounted } from "vue";
   import { invoke } from "@tauri-apps/api/core";
   import QueenIcon from "./components/icons/QueenIcon.vue";
-  const gridSize = 4; 
+  import ErrorBox from "./components/icons/ErrorBox.vue";
+  import XBox from "./components/icons/XBox.vue";
+  import SelectBoxx from "./components/icons/SelectBoxx.vue";
+  const gridSize = 10; 
 
 
   function getBorders(index:number, grid:any, size: number) {
@@ -60,22 +63,193 @@
     };
   }
 
-  function findColour(cell: never, i: number){
-    if (position.value == i){
-      return "#000000";
-    }
-    else{
-      return colourMap[cell];
-    }
+  function findColour(cell: never){
+    return colourMap[cell];
+    
   }
 
   var input = ref(new Array(gridSize**2).fill(0));
+  var invalids = ref(new Array(gridSize**2).fill(0));
   const grid = ref([]);
+
+  function findInvalids(newQueenIndex: number){
+
+    const column = newQueenIndex%gridSize;
+    const row = Math.floor(newQueenIndex/gridSize);
+    console.log(row, column)
+    var counter = 0;
+    // check column:
+    for(let i = 0; i < gridSize; i++){
+      if(input.value[column+gridSize*i] == 1){
+        counter+=1;
+      }
+    }
+    if(counter >1){
+      console.log("column issue");
+      for(let i = 0; i < gridSize; i++){
+        invalids.value[column+gridSize*i] +=1;
+      }
+    }
+
+    // check row
+    counter = 0;
+    for(let i = 0; i < gridSize; i++){
+      if(input.value[row*gridSize+i] == 1){
+        counter+=1;
+      }
+    }
+    if(counter >1){
+      console.log("row issue");
+      for(let i = 0; i < gridSize; i++){
+        invalids.value[row*gridSize+i] +=1;
+      }
+    }
+    // check proximities
+    const coordsAround = [ -gridSize, gridSize]
+
+    // ADD CONSTRAINTS FOR PROXIMITIES
+    if(column >0){
+      coordsAround.push( -1)
+      if(row > 0){
+        coordsAround.push(-1-gridSize)
+      }
+      if(row < gridSize-1){
+        coordsAround.push(-1+gridSize)
+      }
+    }
+    if(column < gridSize-1){
+      coordsAround.push( 1)
+      if(row > 0){
+        coordsAround.push(1-gridSize)
+      }
+      if(row < gridSize-1){
+        coordsAround.push(1+gridSize)
+      }
+    }
+    for (const x of coordsAround){
+      // if(newQueenIndex+x >=0 && newQueenIndex+x <gridSize**2){
+        if(input.value[newQueenIndex+x] == 1){
+          console.log("nearby issue")
+          invalids.value[newQueenIndex+x]+=1;
+          invalids.value[newQueenIndex]+=1;
+        // }
+      }
+    }
+    // check colours
+    counter = 0;
+    const colour = grid.value[newQueenIndex];
+    var colouredCells = [];
+    for(let i = 0; i < gridSize**2; i++){
+      if(grid.value[i] == colour){
+        colouredCells.push(i)
+        if(input.value[i] == 1){
+          counter +=1;
+      }
+
+      }
+    }
+    if(counter >1){
+      console.log("colour issue")
+      for(const colouredCell of colouredCells){
+        invalids.value[colouredCell] +=1;
+      }
+    }
+  }
+
+  function removeInvalids(newQueenIndex: number){
+
+    const column = newQueenIndex%gridSize;
+    const row = Math.floor(newQueenIndex/gridSize);
+    var counter = 0;
+    // check column:
+    for(let i = 0; i < gridSize; i++){
+      if(input.value[column+gridSize*i] == 1){
+        counter+=1;
+      }
+    }
+    if(counter >0){
+      console.log("column fix");
+
+      for(let i = 0; i < gridSize; i++){
+        invalids.value[column+gridSize*i] -=1;
+      }
+    }
+
+    // check row
+    counter = 0;
+    for(let i = 0; i < gridSize; i++){
+      if(input.value[row*gridSize+i] == 1){
+        counter+=1;
+      }
+    }
+    if(counter >0){
+      console.log("row fix");
+      for(let i = 0; i < gridSize; i++){
+        invalids.value[row*gridSize+i] -=1;
+      }
+    }
+    // check proximities
+    const coordsAround = []
+
+    // ADD CONSTRAINTS FOR PROXIMITIES
+    if(column >0){
+      coordsAround.push( -1)
+      if(row > 0){
+        coordsAround.push(-1-gridSize)
+      }
+      if(row < gridSize-1){
+        coordsAround.push(-1+gridSize)
+      }
+    }
+    if(column <gridSize-1){
+      coordsAround.push( 1)
+      if(row > 0){
+        coordsAround.push(1-gridSize);
+      }
+      if(row < gridSize-1){
+        coordsAround.push(1+gridSize);
+      }
+    }
+    if(row > 0){
+      coordsAround.push(-gridSize);
+    }
+    if(row < gridSize-1){
+      coordsAround.push(gridSize);
+    }
+    for (const x of coordsAround){
+      
+      if(input.value[newQueenIndex+x] == 1){
+        console.log("nearby fix");
+        invalids.value[newQueenIndex+x]-=1;
+        invalids.value[newQueenIndex]-=1;
+        
+      }
+    }
+    // check colours
+    counter = 0;
+    const colour = grid.value[newQueenIndex];
+    var colouredCells = [];
+    for(let i = 0; i < gridSize**2; i++){
+      if(grid.value[i] == colour){
+        colouredCells.push(i)
+        if(input.value[i] == 1){
+        counter +=1;
+      }
+      }
+    }
+    if(counter >0){
+      console.log("colour fix");
+      for(const colouredCell of colouredCells){
+        invalids.value[colouredCell] -=1;
+      }
+    }
+  }
 
   async function newGrid(){
     grid.value = await invoke("create_queens_game", { gridSize })
     input = ref(new Array(gridSize**2).fill(0));
     position = ref(gridSize*gridSize);
+    invalids = ref(new Array(gridSize**2).fill(0));
   }
 
   onMounted(async () => {
@@ -129,18 +303,24 @@
   };
   function toggle(i: number, value: number){
     var j = input.value[i];
+
     if (j == value){
       input.value[i] = 0;
+      if(value == 1){
+        removeInvalids(i);
+      }
     }else{
       input.value[i] = value;
+      if(value == 1){
+        findInvalids(i);
+      }else if(j == 1){removeInvalids(i)}
     }
+    console.log(invalids.value)
   }
-
 
 </script>
 
 <template>
-  <!-- <div tabindex="0" @keydown.left.prevent="move(-1)" @keydown.right.prevent="move(1)" @keydown.up.prevent="move(-gridSize)" @keydown.down.prevent="move(gridSize)"/> -->
   <div class="background">
     <button @click="newGrid"></button>
     <div class="square">
@@ -153,14 +333,17 @@
           :key="i"
           class="cell"
           :class="getBorderClasses(i)"
-          :style="{ backgroundColor: findColour(cell, i) }"
+          :style="{ backgroundColor: findColour(cell) }"
           @click.shift="position=i; toggle(i, 2)"
           @click.exact="position=i; toggle(i, 1)"
         >
-          <svg v-if="input[i] === 1" viewBox="0 0 32 22" height="min(60%, 60%)" width="min(60%, 60%)" y="1em">
-            <QueenIcon></QueenIcon>
+          <svg v-if="input[i] === 1" viewBox="0 0 32 22" style="height:60%; width:60%; z-index: 1;">
+            <QueenIcon/>
           </svg>
-          <div v-if="input[i] === 2" style="font-size: 100px;">X</div>
+          <svg v-if="position===i" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 2;">
+            <select-boxx/>
+          </svg>
+          <XBox v-if="input[i] === 2" style="font-size: 100px;"/>
         </div>
       </div>
     </div>
@@ -196,14 +379,21 @@
   height: 100%;
   border: 4px solid #000000;
   border-radius: 1%;
+  /* z-index: -2; */
 }
 .cell{
   display: flex;
+  position: relative;
   aspect-ratio: 1 / 1;
   border: 1px solid #00000055;
   box-sizing: border-box;
   justify-content: center; 
   align-items: center;
+}
+.cell svg {
+  position: absolute;
+  inset: 0;
+  margin: auto;
 }
 
 

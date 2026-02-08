@@ -3,7 +3,7 @@
 </script>
 <template>
     <div class="QueenSquare">
-        <svg viewBox="0 0 32 22" height="min(60%, 60%)" width="min(60%, 60%)" y="1em">
+        <svg viewBox="0 0 32 22" style="height:60%; width:60%;" y="1em">
             <QueenIcon></QueenIcon>
         </svg>
     </div>

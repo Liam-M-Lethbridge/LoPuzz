@@ -4,6 +4,7 @@ mod game_logic;
 use crate::game_logic::queens::generate_grid;
 use crate::game_logic::queens::find_colours;
 use crate::game_logic::queens::colour_cell;
+use crate::game_logic::queens::check_grids;
 use std::collections::HashSet;
 use rand::{Rng, rng};
 
@@ -54,4 +55,8 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
     
 
     return colour_grid;
+}
+
+fn check_solution(grid1:Vec<u32>, grid2:Vec<u32>) -> bool{
+    return check_grids(grid1, grid2);
 }
