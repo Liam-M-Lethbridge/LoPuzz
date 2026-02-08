@@ -5,7 +5,8 @@
   import ErrorBox from "./components/icons/ErrorBox.vue";
   import XBox from "./components/icons/XBox.vue";
   import SelectBoxx from "./components/icons/SelectBoxx.vue";
-  const gridSize = 10; 
+
+  const gridSize = 8; 
 
 
   function getBorders(index:number, grid:any, size: number) {
@@ -337,11 +338,14 @@
           @click.shift="position=i; toggle(i, 2)"
           @click.exact="position=i; toggle(i, 1)"
         >
-          <svg v-if="input[i] === 1" viewBox="0 0 32 22" style="height:60%; width:60%; z-index: 1;">
+          <svg v-if="input[i] === 1" viewBox="0 0 32 22" style="height:60%; width:60%; z-index: 2;">
             <QueenIcon/>
           </svg>
-          <svg v-if="position===i" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 2;">
+          <svg v-if="position===i" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 3;">
             <select-boxx/>
+          </svg>
+          <svg v-if="invalids[i] >0" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 1;">
+            <ErrorBox/>
           </svg>
           <XBox v-if="input[i] === 2" style="font-size: 100px;"/>
         </div>
