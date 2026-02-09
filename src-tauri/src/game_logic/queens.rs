@@ -157,7 +157,8 @@ pub fn print_grid(grid: Vec<u32>, size: u32){
 /// size: the size of the grid.
 pub fn colour_grid_recursively(colour_grid: &mut Vec<u32>, mut queue: Vec<(u32, u32)>, seen: HashSet<(u32, u32)>, size: u32) -> bool {
     if queue.is_empty() {
-        return true;
+        let mut temp_grid = vec![0; (size * size) as usize];
+        return count_solutions(colour_grid, 0, size, &mut temp_grid, 0) == 1;
     }
 
     let idx = rng().random_range(0..queue.len());
@@ -165,9 +166,6 @@ pub fn colour_grid_recursively(colour_grid: &mut Vec<u32>, mut queue: Vec<(u32, 
 
     colour_cell_reursively(colour_grid, queue, seen, row, col, size)
 }
-
-
-
 
 
 
@@ -190,13 +188,12 @@ pub fn colour_cell_reursively(colour_grid: &mut Vec<u32>, queue: Vec<(u32, u32)>
         colour_grid[idx] = c;
         colour_cell(colour_grid, &mut new_queue, &mut new_seen, row, col, size);
 
-        let mut temp_grid = vec![0; (size * size) as usize];
-        if count_solutions(colour_grid, 0, size, &mut temp_grid, 0) == 1 {
+        
 
-            if colour_grid_recursively(colour_grid, new_queue, new_seen, size) {
-                return true;
-            }
+        if colour_grid_recursively(colour_grid, new_queue, new_seen, size) {
+            return true;
         }
+        
 
         // backtrack
         colour_grid[idx] = 0;
@@ -207,10 +204,10 @@ pub fn colour_cell_reursively(colour_grid: &mut Vec<u32>, queue: Vec<(u32, u32)>
 
 
 /// this function counts the number of solutions
-/// cololur_grid: the grid of coloured boxes, a 0 value means the cell is uncoloured
+/// colour_grid: the grid of coloured boxes, a 0 value means the cell is uncoloured
 /// current_count: the current number of solutions found (only need two to know it isn't unique)
 /// current_grid: the current grid of queen placements
-fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u32, current_grid: &mut Vec<u32>, current_row: u32) -> u32{
+pub fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u32, current_grid: &mut Vec<u32>, current_row: u32) -> u32{
     // print_grid(colour_grid.to_vec(), size);
     let colours: Vec<u32> =  (0..size*size).filter(|x: &u32| current_grid[*x as usize] == 1).map(|x| colour_grid[x as usize]).collect::<Vec<u32>>();
     
@@ -251,14 +248,51 @@ fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u32, c
     return current_count;
 }
 
+
+/// this function finds all solutions
+/// colour_grid: the grid of coloured boxes, a 0 value means the cell is uncoloured
+/// current_count: the current number of solutions found (only need two to know it isn't unique)
+/// current_grid: the current grid of queen placements
+pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>, size: u32, current_grid: &mut Vec<u32>, current_row: u32){
+    // print_grid(colour_grid.to_vec(), size);
+    let colours: Vec<u32> =  (0..size*size).filter(|x: &u32| current_grid[*x as usize] == 1).map(|x| colour_grid[x as usize]).collect::<Vec<u32>>();
+    
+    if current_row == size {
+        // print_grid(current_grid.to_vec(), size);
+        if valid_solution(current_grid.to_vec(), size, &colours) {
+            // println!("VALID");
+            all_solutions.push(current_grid.clone());
+            return;
+        } else {
+            // println!("NOT VALID");
+            return;
+        }
+    }
+
+
+    let mut queue: Vec<u32> = Vec::new();
+    // for each row, find the number of queens we can use
+    for j in 0..size{
+        if colour_grid[(current_row*size+j) as usize] >0{
+            queue.push(current_row*size +j);
+        }
+    }
+
+    // for each queen in the row, fill out the square with the queen and recurse
+    for potential_queen in queue {
+        let mut new_grid = current_grid.clone();
+        new_grid[potential_queen as usize] = 1;
+
+        find_solutions(colour_grid,all_solutions,size, &mut new_grid, current_row + 1);
+    }
+}
+
 /// this function checks if a solution is valid
 /// grid: the grid of queen placements
 /// size: the desired number of queens
 /// colours: the list colours attributed to each queen
 fn valid_solution(grid: Vec<u32>, size: u32, colours: &Vec<u32>) -> bool{
     // need the right number of queens
-
-    
     // check rows
     for row in 0..size{
         let mut count = 0;
