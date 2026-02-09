@@ -4,17 +4,12 @@
   import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
 
-
-  const gridSize = 8;
   const hover = ref(false);
-  const grid = ref([]);
   const router = useRouter();
   function toGame(game:string){
     router.push(game);
   }
-onMounted(async () => {
-  grid.value = await invoke("create_queens_game", { gridSize });
-});
+
 
 </script>
 

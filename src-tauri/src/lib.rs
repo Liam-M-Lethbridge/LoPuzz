@@ -1,10 +1,9 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 mod game_logic;
+use crate::game_logic::queens::colour_grid_recursively;
 use crate::game_logic::queens::generate_grid;
-use crate::game_logic::queens::find_colours;
 use crate::game_logic::queens::colour_cell;
-use crate::game_logic::queens::check_grids;
 use std::collections::HashSet;
 use rand::{Rng, rng};
 
@@ -43,20 +42,37 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
         }
     }
     
-    while queue.len() >0 {
-        let idx = rng().random_range(0..queue.len());
-        let (row, col) = queue.remove(idx);
-        let colour = find_colours(&colour_grid, row, col, grid_size);
-        // ToDo: check for possible solutions allowed by completing grid
-        // ToDo (maybe): assert that the colour with the smallest frequency is picked rather than random
-        colour_cell(&colour_grid, &mut queue, &mut seen, row, col, grid_size);
-        colour_grid[(row*grid_size+col) as usize] = colour;
-    }
+    // while queue.len() >0 {
+    //     let idx = rng().random_range(0..queue.len());
+    //     let (row, col) = queue.remove(idx);
+    //     let colours = find_colours(&colour_grid, row, col, grid_size);
+    //     let idx = rng().random_range(0..colours.len());
+
+    //     // ToDo: check for possible solutions allowed by completing grid
+    //     // ToDo (maybe): assert that the colour with the smallest frequency is picked rather than random
+    //     colour_cell(&colour_grid, &mut queue, &mut seen, row, col, grid_size);
+    //     colour_grid[(row*grid_size+col) as usize] = colours[idx];
+    // }
+    println!("{}", colour_grid_recursively(&mut colour_grid, queue, seen, grid_size));
     
 
     return colour_grid;
 }
 
-fn check_solution(grid1:Vec<u32>, grid2:Vec<u32>) -> bool{
-    return check_grids(grid1, grid2);
+
+
+
+
+ fn check_grids(grid1: Vec<u32>, grid2: Vec<u32>) -> bool{
+    // this function checks if two grids are the same.
+    if grid1.len() != grid2.len(){
+        return false;
+    }
+
+    for i in 0..grid1.len(){
+        if grid1[i] != grid2[i]{
+            return false;
+        }
+    }
+    return true;
 }
