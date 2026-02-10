@@ -5,7 +5,7 @@ use tauri::window::Color;
 use std::collections::HashSet;
 use rand::{Rng, rng};
 
-use crate::{game_logic::queens};
+use crate::{check_grids, game_logic::queens};
 
 pub fn generate_grid(grid_size: u32) -> Vec<u32> {
     // This function generates a grid of queen locations in which no two queens exist in the same row or column and no two queens lie within one square of one another.
@@ -253,39 +253,60 @@ pub fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u3
 /// colour_grid: the grid of coloured boxes, a 0 value means the cell is uncoloured
 /// current_count: the current number of solutions found (only need two to know it isn't unique)
 /// current_grid: the current grid of queen placements
-pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>, size: u32, current_grid: &mut Vec<u32>, current_row: u32){
-    // print_grid(colour_grid.to_vec(), size);
-    let colours: Vec<u32> =  (0..size*size).filter(|x: &u32| current_grid[*x as usize] == 1).map(|x| colour_grid[x as usize]).collect::<Vec<u32>>();
-    
+pub fn find_solutions(
+    colour_grid: &Vec<u32>,
+    new_solution: &mut Vec<u32>,
+    size: u32,
+    current_grid: &mut Vec<u32>,
+    queens_grid: &Vec<u32>,
+    current_row: u32
+) -> bool {
+
     if current_row == size {
-        // print_grid(current_grid.to_vec(), size);
-        if valid_solution(current_grid.to_vec(), size, &colours) {
-            // println!("VALID");
-            all_solutions.push(current_grid.clone());
-            return;
-        } else {
-            // println!("NOT VALID");
-            return;
+        let colours: Vec<u32> = (0..size*size)
+            .filter(|x| current_grid[*x as usize] == 1)
+            .map(|x| colour_grid[x as usize])
+            .collect();
+
+       if valid_solution(current_grid.clone(), size, &colours) {
+            if check_grids(current_grid, queens_grid) {
+                return false; // same solution, ignore it
+            }
+            print_grid(current_grid.to_vec(), size);
+            println!("is not the same as");
+            print_grid(queens_grid.to_vec(), size);
+            *new_solution = current_grid.clone();
+            return true;
+        }
+
+        return false;
+    }
+
+    // Try all valid positions in this row
+    for col in 0..size {
+        let idx = (current_row * size + col) as usize;
+
+        if colour_grid[idx] > 0 {
+            current_grid[idx] = 1;
+
+            if find_solutions(
+                colour_grid,
+                new_solution,
+                size,
+                current_grid,
+                queens_grid,
+                current_row + 1
+            ) {
+                return true; // 🚀 propagate success
+            }
+
+            current_grid[idx] = 0; // backtrack
         }
     }
 
-
-    let mut queue: Vec<u32> = Vec::new();
-    // for each row, find the number of queens we can use
-    for j in 0..size{
-        if colour_grid[(current_row*size+j) as usize] >0{
-            queue.push(current_row*size +j);
-        }
-    }
-
-    // for each queen in the row, fill out the square with the queen and recurse
-    for potential_queen in queue {
-        let mut new_grid = current_grid.clone();
-        new_grid[potential_queen as usize] = 1;
-
-        find_solutions(colour_grid,all_solutions,size, &mut new_grid, current_row + 1);
-    }
+    false
 }
+
 
 /// this function checks if a solution is valid
 /// grid: the grid of queen placements

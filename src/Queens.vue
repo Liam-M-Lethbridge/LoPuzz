@@ -6,7 +6,7 @@
   import XBox from "./components/icons/XBox.vue";
   import SelectBoxx from "./components/icons/SelectBoxx.vue";
 
-  const gridSize = 5; 
+  const gridSize = 6; 
 
   function getBorders(index:number, grid:any, size: number) {
     const row = Math.floor(index / size);

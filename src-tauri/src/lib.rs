@@ -10,6 +10,7 @@ use crate::game_logic::queens::find_colours;
 use crate::game_logic::queens::print_grid;
 
 use std::collections::{HashSet, VecDeque};
+use std::ops::Not;
 use rand::seq::index;
 use rand::{Rng, rng};
 
@@ -27,7 +28,7 @@ pub fn run() {
 
 #[tauri::command]
 fn create_queens_game(grid_size: u32) -> Vec<u32> {
-    let queens_grid = generate_grid(grid_size);
+    let mut queens_grid = generate_grid(grid_size);
 
     if queens_grid.iter().sum::<u32>() == 0 {
         return queens_grid;
@@ -65,27 +66,25 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
     let mut temp_grid = vec![0; (grid_size * grid_size) as usize];
 
     println!("{}", count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0));
-
-    while count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0) != 1 {
-        let mut all_solutions: Vec<Vec<u32>> = Vec::new();
-        find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0);
-
+    let mut new_solution: Vec<u32> = Vec::new();
+    let mut unique = !find_solutions(&colour_grid, &mut new_solution, grid_size, &mut temp_grid, &mut queens_grid, 0);
+    while ! unique {
+        // maybe just find one solution first
+        
+        // print_grid(new_solution.to_vec(), grid_size);
         let mut conflict_grid: Vec<u32> = vec![0; (grid_size * grid_size) as usize];
         let mut conflicts: Vec<u32> = Vec::new();
         // combine these solutions into a grid of conflicts 
         
         for i in 0..(grid_size*grid_size) as usize{
             if queens_grid[i] == 0{
-                for grid in &all_solutions{
-                    if grid[i] == 1{
-                        conflict_grid[i] = 1;
-                        conflicts.push(i as u32);
-                        break;
-                    }
+                if new_solution[i] == 1{
+                    conflict_grid[i] = 1;
+                    conflicts.push(i as u32);
                 }
             }
         }
-        print_grid(conflict_grid, grid_size);
+    
 
         // now that we have the conflicts, we can ammend them by changing their colour
 
@@ -110,8 +109,9 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
 
         // if we have successfully changed colour then we can try again
         // however, if we have not, then we have to widen the search until we can change colour
-
-        return colour_grid;
+        let mut new_solution: Vec<u32> = Vec::new();
+        unique = !find_solutions(&colour_grid, &mut new_solution, grid_size, &mut temp_grid, &mut queens_grid, 0);
+        // return colour_grid;
     }
 
     return colour_grid;
@@ -165,7 +165,7 @@ fn change_colour(colour_grid: &mut Vec<u32>, index: u32, size: u32, actual_solut
 }
 
 
- fn check_grids(grid1: Vec<u32>, grid2: Vec<u32>) -> bool{
+ fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
     // this function checks if two grids are the same.
     if grid1.len() != grid2.len(){
         return false;
