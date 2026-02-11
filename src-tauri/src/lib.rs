@@ -5,13 +5,12 @@ use crate::game_logic::queens::colour_grid_recursively;
 use crate::game_logic::queens::find_solutions;
 use crate::game_logic::queens::generate_grid;
 use crate::game_logic::queens::colour_cell;
-use crate::game_logic::queens::count_solutions;
 use crate::game_logic::queens::find_colours;
 use crate::game_logic::queens::print_grid;
 
 use std::collections::{HashSet, VecDeque, HashMap};
 use rand::seq::index;
-use rand::{Rng, rng};
+use rand::{Rng, rng, seq::SliceRandom};
 
 
 
@@ -36,6 +35,7 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
     let mut seen: HashSet<(u32, u32)> = HashSet::new();
     let mut colour_grid = vec![0; (grid_size * grid_size) as usize];
     let mut counter = 0;
+    let mut working_solution: Vec<(u32, u32, u32)> = Vec::new();
 
     // find all queens and give them each a different colour value
     for row in 0..grid_size {
@@ -44,81 +44,16 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
                 colour_cell(&colour_grid, &mut queue, &mut seen, row, col, grid_size);
                 counter += 1;
                 colour_grid[(row*grid_size+col) as usize] = counter;
+                working_solution.push((row, col, counter));
             }
         }
     }
-    
-    while queue.len() >0 {
-        let idx = rng().random_range(0..queue.len());
-        let (row, col) = queue.remove(idx);
-        let colours = find_colours(&colour_grid, row, col, grid_size);
-        let idx = rng().random_range(0..colours.len());
 
-        // ToDo: check for possible solutions allowed by completing grid
-        // ToDo (maybe): assert that the colour with the smallest frequency is picked rather than random
-        colour_cell(&colour_grid, &mut queue, &mut seen, row, col, grid_size);
-        colour_grid[(row*grid_size+col) as usize] = colours[idx];
-    }
+    
+    // we start colouring recursively. Using the queue containing the neighbours of the queens
+    colour_grid_recursively(&mut colour_grid, queue, seen, grid_size, &mut working_solution);
     // println!("{}", colour_grid_recursively(&mut colour_grid, queue, seen, grid_size));
     
-    // we have our grid, we want to check if the solutions are unique
-    let mut temp_grid = vec![0; (grid_size * grid_size) as usize];
-    let mut conflict_pairs: Vec<Vec<u32>> = Vec::new();
-    for i in 0..grid_size*grid_size{
-        conflict_pairs.push(Vec::new());
-    }
-    // println!("{}", count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0));
-    let mut all_solutions: Vec<Vec<u32>> = Vec::new();
-
-    while find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0) > 1{
-        let mut conflict_grid: Vec<u32> = vec![0; (grid_size * grid_size) as usize];
-        let mut conflicts: Vec<u32> = Vec::new();
-        // combine these solutions into a grid of conflicts 
-        
-        for i in 0..(grid_size*grid_size) as usize{
-            if queens_grid[i] == 0{
-                for grid in &all_solutions{
-                    if grid[i] == 1{
-                        conflict_grid[i] = 1;
-                        conflicts.push(i as u32);
-                        break;
-                    }
-                }
-            }
-        }
-        print_grid(conflict_grid, grid_size);
-
-        // now that we have the conflicts, we can ammend them by changing their colour
-
-        let mut colour_queens_index: Vec<(u32, u32, u32)> = Vec::new();
-        for row in 0..grid_size{
-            for col in 0..grid_size{
-                let idx = (row*grid_size+col) as usize;
-                if queens_grid[idx] == 1{
-                    colour_queens_index.push((colour_grid[idx], row, col));
-                }
-            }
-        }
-        
-        for conflict in conflicts{
-            conflict_pairs[conflict as usize].push(colour_grid[conflict as usize]);
-            
-            // changes the colour of any conflict
-            // change_colour(&mut colour_grid, conflict, grid_size, &queens_grid, &conflict_pairs[conflict as usize]);
-            // set all conflicts to 0? try to fill the grid?
-            colour_grid[conflict as usize] = 0;
-        }
-        
-        // now all conflicts are fixed we set all the invalid shapes to 0 we could colour in each square again making sure that the conflicts are coloured in last? and colour them in appropriately
-        fix_invalid_colours(&mut colour_grid, &colour_queens_index, grid_size);
-        temp_grid = vec![0; (grid_size * grid_size) as usize];
-        fill_grid(&mut colour_grid, grid_size, &conflict_pairs);
-    }
-        
-
-    // if we have successfully changed colour then we can try again
-    // however, if we have not, then we have to widen the search until we can change colour
-
     return colour_grid;
 }
 
