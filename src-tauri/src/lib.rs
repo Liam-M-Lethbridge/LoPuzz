@@ -26,7 +26,7 @@ pub fn run() {
 
 #[tauri::command]
 fn create_queens_game(grid_size: u32) -> Vec<u32> {
-    let queens_grid = generate_grid(grid_size);
+    let mut queens_grid = generate_grid(grid_size);
 
     if queens_grid.iter().sum::<u32>() == 0 {
         return queens_grid;
@@ -114,6 +114,13 @@ fn fill_grid(
                     possible_colours.push(colour_grid[idx]);
                 }
             }
+
+            if parent.contains_key(&next) {
+                continue;
+            }
+
+            parent.insert(next, current);
+            queue.push_back(next);
         }
 
         // Try to colour the whole region
@@ -209,7 +216,9 @@ fn change_colour(
     }
 }
 
-fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
+
+
+ fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
     // this function checks if two grids are the same.
     if grid1.len() != grid2.len(){
         return false;

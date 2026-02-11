@@ -178,7 +178,7 @@ pub fn colour_grid_recursively(colour_grid: &mut Vec<u32>, mut queue: Vec<(u32, 
     
     while let Some((row, col)) = queue.pop(){
         // randomly skip a cell
-        if random_range(0..20/(size))==0{
+        if random_range(0..1/(size))==0{
             queue.push((row, col));
             continue;
         }
