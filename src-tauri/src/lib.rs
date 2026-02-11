@@ -9,7 +9,7 @@ use crate::game_logic::queens::count_solutions;
 use crate::game_logic::queens::find_colours;
 use crate::game_logic::queens::print_grid;
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque, HashMap};
 use rand::seq::index;
 use rand::{Rng, rng};
 
@@ -63,11 +63,14 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
     
     // we have our grid, we want to check if the solutions are unique
     let mut temp_grid = vec![0; (grid_size * grid_size) as usize];
-
+    let mut conflict_pairs: Vec<Vec<u32>> = Vec::new();
+    for i in 0..grid_size*grid_size{
+        conflict_pairs.push(Vec::new());
+    }
     // println!("{}", count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0));
     let mut all_solutions: Vec<Vec<u32>> = Vec::new();
 
-    while find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0, 0) > 1{
+    while find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0) > 1{
         let mut conflict_grid: Vec<u32> = vec![0; (grid_size * grid_size) as usize];
         let mut conflicts: Vec<u32> = Vec::new();
         // combine these solutions into a grid of conflicts 
@@ -98,24 +101,32 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
         }
         
         for conflict in conflicts{
-            change_colour(&mut colour_grid, conflict, grid_size, &queens_grid);
-            fix_invalid_colours(&mut colour_grid, &colour_queens_index, grid_size);
-            if count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0) == 1{
-                println!("nice job.");
-                return colour_grid;
-            }
+            conflict_pairs[conflict as usize].push(colour_grid[conflict as usize]);
+            
+            // changes the colour of any conflict
+            // change_colour(&mut colour_grid, conflict, grid_size, &queens_grid, &conflict_pairs[conflict as usize]);
+            // set all conflicts to 0? try to fill the grid?
+            colour_grid[conflict as usize] = 0;
         }
-
-        // if we have successfully changed colour then we can try again
-        // however, if we have not, then we have to widen the search until we can change colour
-
-        return colour_grid;
+        
+        // now all conflicts are fixed we set all the invalid shapes to 0 we could colour in each square again making sure that the conflicts are coloured in last? and colour them in appropriately
+        fix_invalid_colours(&mut colour_grid, &colour_queens_index, grid_size);
+        temp_grid = vec![0; (grid_size * grid_size) as usize];
+        fill_grid(&mut colour_grid, grid_size, &conflict_pairs);
     }
+        
+
+    // if we have successfully changed colour then we can try again
+    // however, if we have not, then we have to widen the search until we can change colour
 
     return colour_grid;
-    
-
 }
+
+    
+// New idea.
+// When filling in the grid. Keep track of all possible queens
+// keep track of all new additions, keep adding until a valid set of queens is achieved, don't add that one. Should be able to do recursively
+
 
 /// This function fills the grid appropriately
 fn fill_grid(
@@ -263,9 +274,7 @@ fn change_colour(
     }
 }
 
-
-
- fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
+fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
     // this function checks if two grids are the same.
     if grid1.len() != grid2.len(){
         return false;
@@ -278,7 +287,6 @@ fn change_colour(
     }
     return true;
 }
-
 
 /// Fix invalid colours in the grid:
 /// colour_grid: the current colouring (0 = uncoloured)
