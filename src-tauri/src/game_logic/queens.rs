@@ -209,6 +209,8 @@ pub fn colour_cell_reursively(colour_grid: &mut Vec<u32>, queue: Vec<(u32, u32)>
 /// current_grid: the current grid of queen placements
 pub fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u32, current_grid: &mut Vec<u32>, current_row: u32) -> u32{
     // print_grid(colour_grid.to_vec(), size);
+        // println!("counting solutions");
+
     let colours: Vec<u32> =  (0..size*size).filter(|x: &u32| current_grid[*x as usize] == 1).map(|x| colour_grid[x as usize]).collect::<Vec<u32>>();
     
     if current_row == size {
@@ -261,7 +263,7 @@ pub fn find_solutions(
     queens_grid: &Vec<u32>,
     current_row: u32
 ) -> bool {
-
+    // println!("finding solutions");
     if current_row == size {
         let colours: Vec<u32> = (0..size*size)
             .filter(|x| current_grid[*x as usize] == 1)
@@ -272,9 +274,6 @@ pub fn find_solutions(
             if check_grids(current_grid, queens_grid) {
                 return false; // same solution, ignore it
             }
-            print_grid(current_grid.to_vec(), size);
-            println!("is not the same as");
-            print_grid(queens_grid.to_vec(), size);
             *new_solution = current_grid.clone();
             return true;
         }
@@ -315,6 +314,7 @@ pub fn find_solutions(
 fn valid_solution(grid: Vec<u32>, size: u32, colours: &Vec<u32>) -> bool{
     // need the right number of queens
     // check rows
+    // println!("checking if valid solution");
     for row in 0..size{
         let mut count = 0;
         for col in 0..size {
