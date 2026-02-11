@@ -64,12 +64,10 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
     // we have our grid, we want to check if the solutions are unique
     let mut temp_grid = vec![0; (grid_size * grid_size) as usize];
 
-    println!("{}", count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0));
+    // println!("{}", count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0));
+    let mut all_solutions: Vec<Vec<u32>> = Vec::new();
 
-    while count_solutions(&colour_grid, 0, grid_size, &mut temp_grid, 0) != 1 {
-        let mut all_solutions: Vec<Vec<u32>> = Vec::new();
-        find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0);
-
+    while find_solutions(&colour_grid, &mut all_solutions, grid_size, &mut temp_grid, 0, 0) > 1{
         let mut conflict_grid: Vec<u32> = vec![0; (grid_size * grid_size) as usize];
         let mut conflicts: Vec<u32> = Vec::new();
         // combine these solutions into a grid of conflicts 

@@ -253,7 +253,7 @@ pub fn count_solutions(colour_grid: &Vec<u32>, mut current_count : u32, size: u3
 /// colour_grid: the grid of coloured boxes, a 0 value means the cell is uncoloured
 /// current_count: the current number of solutions found (only need two to know it isn't unique)
 /// current_grid: the current grid of queen placements
-pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>, size: u32, current_grid: &mut Vec<u32>, current_row: u32){
+pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>, size: u32, current_grid: &mut Vec<u32>, current_row: u32, mut n_solutions: u32) -> u32{
     // print_grid(colour_grid.to_vec(), size);
     let colours: Vec<u32> =  (0..size*size).filter(|x: &u32| current_grid[*x as usize] == 1).map(|x| colour_grid[x as usize]).collect::<Vec<u32>>();
     
@@ -262,10 +262,10 @@ pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>
         if valid_solution(current_grid.to_vec(), size, &colours) {
             // println!("VALID");
             all_solutions.push(current_grid.clone());
-            return;
+            return 1;
         } else {
             // println!("NOT VALID");
-            return;
+            return 0;
         }
     }
 
@@ -283,8 +283,9 @@ pub fn find_solutions(colour_grid: &Vec<u32>,  all_solutions: &mut Vec<Vec<u32>>
         let mut new_grid = current_grid.clone();
         new_grid[potential_queen as usize] = 1;
 
-        find_solutions(colour_grid,all_solutions,size, &mut new_grid, current_row + 1);
+        n_solutions += find_solutions(colour_grid,all_solutions,size, &mut new_grid, current_row + 1, n_solutions);
     }
+    return n_solutions;
 }
 
 /// this function checks if a solution is valid
