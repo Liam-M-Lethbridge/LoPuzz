@@ -117,53 +117,155 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
 
 }
 
-/// This function changes colour to remove possible clashes
-fn change_colour(colour_grid: &mut Vec<u32>, index: u32, size: u32, actual_solution: &Vec<u32>){
+/// This function fills the grid appropriately
+fn fill_grid(
+    colour_grid: &mut Vec<u32>,
+    size: u32,
+    conflict_grid: &Vec<Vec<u32>>,
+) {
+    loop {
+        let mut queue: VecDeque<u32> = VecDeque::new();
+        let mut visited: HashSet<u32> = HashSet::new();
+        let mut possible_colours: Vec<u32> = Vec::new();
+        let mut region: Vec<u32> = Vec::new();
 
-    let current_colour = colour_grid[index as usize];
-    let row: i32 = (index/size) as i32;
-    let col: i32 = (index%size) as i32;
-    let mut colours: Vec<u32> = Vec::new();
-    let mut neighbours: Vec<u32> = Vec::new();
-    
-    for (dr, dc) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
-        let r = row + dr;
-        let c = col + dc;
+        // Find first uncoloured cell
+        let start = match colour_grid.iter().position(|&c| c == 0) {
+            Some(i) => i as u32,
+            None => return, 
+        };
 
-        if r >= 0 && r < size as i32 && c >= 0 && c < size as i32 {
-            let idx = (r * size as i32+ c) as usize;
-            if actual_solution[idx] == 0{
-                neighbours.push(idx as u32);
-            }
-            let colour = colour_grid[idx];
-            if colour != 0  && colour != current_colour{
-                colours.push(colour);
-                
+        queue.push_back(start);
+        visited.insert(start);
+        region.push(start);
+
+        // Flood-fill zero region
+        while let Some(current) = queue.pop_front() {
+            let r = (current / size) as i32;
+            let c = (current % size) as i32;
+
+            for (dr, dc) in [(-1,0), (1,0), (0,-1), (0,1)] {
+                let nr = r + dr;
+                let nc = c + dc;
+
+                if nr < 0 || nr >= size as i32 || nc < 0 || nc >= size as i32 {
+                    continue;
+                }
+
+                let next = (nr as u32) * size + (nc as u32);
+                let idx = next as usize;
+
+                if visited.contains(&next) {
+                    continue;
+                }
+
+                visited.insert(next);
+
+                if colour_grid[idx] == 0 {
+                    queue.push_back(next);
+                    region.push(next);
+                } else if !possible_colours.contains(&colour_grid[idx]) {
+                    possible_colours.push(colour_grid[idx]);
+                }
             }
         }
+
+        // Try to colour the whole region
+        let mut applied = false;
+
+        for colour in possible_colours {
+            if region.iter().all(|&i| !conflict_grid[i as usize].contains(&colour)) {
+                for &i in &region {
+                    colour_grid[i as usize] = colour;
+                }
+                applied = true;
+                break;
+            }
+        }
+
+        if !applied {
+            return;
+        }
     }
-
-    // just choose the first one
-    for colour in colours{
-        colour_grid[index as usize] = colour;
-        return;
-        
-    }
-
-    // if we have not changed colour, we have to change colour with a new method
-    // choose a neighbour to also change, provided it is not one of the original queens.
-    
-    let neighbour = neighbours[rng().random_range(0..neighbours.len())];
-
-    change_colour(colour_grid, neighbour, size, actual_solution);
-    colour_grid[index as usize] = colour_grid[neighbour as usize];
-
-
-    return;
 }
 
 
- fn check_grids(grid1: Vec<u32>, grid2: Vec<u32>) -> bool{
+
+/// This function changes colour to remove possible clashes
+
+fn change_colour(
+    colour_grid: &mut Vec<u32>,
+    start: u32,
+    size: u32,
+    actual_solution: &Vec<u32>,
+    banned_colours: &Vec<u32>
+) {
+    let size_i32 = size as i32;
+
+
+    let mut queue = VecDeque::new();
+    let mut parent: HashMap<u32, u32> = HashMap::new();
+
+    queue.push_back(start);
+    parent.insert(start, start);
+
+    let mut found_colour: Option<(u32, u32)> = None;
+
+    while let Some(current) = queue.pop_front() {
+        let r = (current / size) as i32;
+        let c = (current % size) as i32;
+
+        let idx = current as usize;
+
+        // Found a cell (not the start) which does not contain any of the banned colours
+        if current != start && !banned_colours.iter().any(|&i| i== colour_grid[idx]) {
+            found_colour = Some((current, colour_grid[idx]));
+            break;
+        }
+
+        for (dr, dc) in [(-1,0), (1,0), (0,-1), (0,1)] {
+            let nr = r + dr;
+            let nc = c + dc;
+
+            if nr < 0 || nr >= size_i32 || nc < 0 || nc >= size_i32 {
+                continue;
+            }
+
+            let next = (nr as u32) * size + (nc as u32);
+            let next_idx = next as usize;
+
+            // Blocked by a queen
+            if actual_solution[next_idx] == 1 {
+                continue;
+            }
+
+            if parent.contains_key(&next) {
+                continue;
+            }
+
+            parent.insert(next, current);
+            queue.push_back(next);
+        }
+    }
+
+    // No reachable colour → nothing to propagate
+    let (end, colour) = match found_colour {
+        Some(v) => v,
+        None => return,
+    };
+
+    // Walk backwards and fill colour
+    let mut current = end;
+    while current != start {
+        let prev = parent[&current];
+        colour_grid[prev as usize] = colour;
+        current = prev;
+    }
+}
+
+
+
+ fn check_grids(grid1: &[u32], grid2: &[u32]) -> bool{
     // this function checks if two grids are the same.
     if grid1.len() != grid2.len(){
         return false;
@@ -179,10 +281,12 @@ fn change_colour(colour_grid: &mut Vec<u32>, index: u32, size: u32, actual_solut
 
 
 /// Fix invalid colours in the grid:
-/// - colour_grid: the current colouring (0 = uncoloured)
-/// - colour_queen_indices: the queen positions grid for each colour (colour, row, col)
-/// - n_colours: number of colours used
+/// colour_grid: the current colouring (0 = uncoloured)
+/// colour_queen_indices: the queen positions grid for each colour (colour, row, col)
+/// n_colours: number of colours used
 pub fn fix_invalid_colours(colour_grid: &mut Vec<u32>, colour_queen_indices: &Vec<(u32, u32, u32)>, size: u32){
+    // println!("fixing colours");
+
     let size_i32 = size as i32;
 
     for colour in 1..=size {
