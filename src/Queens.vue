@@ -287,7 +287,7 @@
 
   
   });
-  // TODO generate the colours RANDOMLY else you can figure out just from the colours  
+
   const colourMap = {
     0: "oklch(0 0 0)",
     1: "oklch(0.8266 0.0967 19.33)",
