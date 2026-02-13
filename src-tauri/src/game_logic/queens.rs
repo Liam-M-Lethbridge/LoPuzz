@@ -235,7 +235,7 @@ fn count_solutions(
     placed: &mut Vec<(u32,u32,u32)>,
     solution_count: &mut u32,
 ) {
-    if *solution_count > 1 {
+    if *solution_count >= 1 {
         return;
     }
 
