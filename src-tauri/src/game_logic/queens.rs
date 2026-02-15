@@ -2,7 +2,7 @@ use std::vec;
 
 use rand::rng;
 use rand::{random_range, seq::SliceRandom};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 /// This function generates a grid of queen locations in which no two queens exist in the same row or column and no two queens lie within one square of one another.
 /// - grid_size: the size of the grid.
@@ -63,6 +63,18 @@ fn is_valid(grid: Vec<u32>, row: u32, col: u32, size: u32) -> bool {
     return true;
 }
 
+/// This function finds the 3 colours with the largest frequency
+/// - colour_counter: the hashmap of colours to their frequencies.
+fn smallest_colours(colour_counter: &HashMap<u32, u32>) -> Vec<u32> {
+    let mut items: Vec<(u32, u32)> =
+        colour_counter.iter().map(|(c, count)| (*c, *count)).collect();
+
+    items.sort_by_key(|(_, count)| *count);
+
+    items.iter().take(1).map(|(c, _)| *c).collect()
+}
+
+
 /// this function locates the nearby uncoloured cells.
 /// - colour_grid: the grid of colours.
 /// - queue: the queue of cells to check.
@@ -72,15 +84,25 @@ fn is_valid(grid: Vec<u32>, row: u32, col: u32, size: u32) -> bool {
 /// - size: the size of the grid.
 pub fn get_neighbours(
     colour_grid: &Vec<u32>,
-    queue: &mut Vec<(u32, u32)>,
+    queue: &mut VecDeque<(u32, u32)>,
     seen: &mut HashSet<(u32, u32)>,
     row: u32,
     col: u32,
     size: u32,
+    colour_counter: &HashMap<u32, u32>
 ) {
     let row = row as i32;
     let col = col as i32;
     let size = size as i32;
+
+    // find the largest colours
+    let s_colours = smallest_colours(&colour_counter.clone());
+    let colour = colour_grid[(row*size+col) as usize];
+    let mut back_or_front = true;
+    // if the colour of the current cell is in the largest frequencies, then we want to push the next cell to the back
+    if s_colours.iter().any(|&c| c==colour){
+        back_or_front = false;
+    }
 
     // check for each directly adjacent cell if it is uncoloured, if so push to queue.
     for (dr, dc) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
@@ -91,7 +113,7 @@ pub fn get_neighbours(
         if r >= 0 && r < size && c >= 0 && c < size {
             let idx = (r * size + c) as usize;
             if colour_grid[idx] == 0 {
-                push_if_not_seen(queue, seen, r as u32, c as u32)
+                push_if_not_seen(queue, seen, r as u32, c as u32, back_or_front);
             }
         }
     }
@@ -103,13 +125,19 @@ pub fn get_neighbours(
 /// - row: the row of the cell in question.
 /// - col: the columns of the cell in question.
 fn push_if_not_seen(
-    queue: &mut Vec<(u32, u32)>,
+    queue: &mut VecDeque<(u32, u32)>,
     seen: &mut HashSet<(u32, u32)>,
     row: u32,
     col: u32,
+    back_or_front: bool
 ) {
     if seen.insert((row, col)) {
-        queue.push((row, col));
+        if back_or_front{
+            queue.push_back((row, col));
+        }
+        else{
+            queue.push_front((row, col));
+        }
     }
 }
 
@@ -144,18 +172,18 @@ pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> Ve
 /// this function prints the grid.
 /// - grid: the grid.
 /// - size: the size of the grid.
-// pub fn print_grid(grid: Vec<u32>, size: u32){
-//     println!();
-//     for r in 0..size {
-//         for c in 0..size {
-//             print!(
-//                 "{} ",
-//                 grid[(r * size + c) as usize]
-//             );
-//         }
-//         println!();
-//     }
-// }
+pub fn print_grid(grid: Vec<u32>, size: u32){
+    println!();
+    for r in 0..size {
+        for c in 0..size {
+            print!(
+                "{} ",
+                grid[(r * size + c) as usize]
+            );
+        }
+        println!();
+    }
+}
 
 /// This function colours in the grid recursively, resulting in a single solution.
 /// - colour_grid: the coloured grid we use.
@@ -164,11 +192,14 @@ pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> Ve
 /// - size: the size of the grid.
 pub fn colour_grid_recursively(
     colour_grid: &mut Vec<u32>,
-    mut queue: Vec<(u32, u32)>,
+    mut queue: VecDeque<(u32, u32)>,
     mut seen: HashSet<(u32, u32)>,
     size: u32,
     working_solution: &mut Vec<(u32, u32, u32)>,
+    colour_counter: &mut HashMap<u32, u32>,
+    impossible_routes_found: &mut u32
 ) -> bool {
+    println!("skib");
     // For each new colour, we need to QUICKLY check if it adds a new solution.
     // to quickly check, force the cell to have queen. From working_solution, construct subset which only contain possible queens.
     // initialise construction and push cell (row, column, colour) to it
@@ -177,21 +208,24 @@ pub fn colour_grid_recursively(
     // return false;
     // }
 
-    // May not even have to be recursive?
-
     // to restrict subset, take an iterable() and filter according to !check_clash(|cell|, new_queen)
     //
     // because we are always checking with the first queen being filled in as the new cell, any solution found using this queen is guaranteed to not be the true solution
     if queue.is_empty() {
-        return true;
-    }
-
-    while let Some((row, col)) = queue.pop() {
-        // randomly skip a cell
-        if random_range(0..10) < size {
-            queue.push((row, col));
-            continue;
+        if colour_grid.iter().any(|&i| i== 0){
+            *impossible_routes_found +=1;
+            return false;
         }
+        return true;
+
+    }
+    while let Some((row, col)) = queue.pop_front() {
+        // randomly skip a cell
+        // if random_range(0..10) < size {
+        //     queue.push((row, col));
+        //     continue;
+        // }
+        println!("ayo wtf");
         let mut colours: Vec<u32> = find_colours(colour_grid, row, col, size);
         colours.shuffle(&mut rng());
         for colour in colours {
@@ -224,30 +258,44 @@ pub fn colour_grid_recursively(
             count_solutions(0, size, &candidates, &mut placed, &mut solution_count);
             // if solution is 1 then we
             if solution_count == 0 {
+                *colour_counter.entry(colour).or_insert(0) += 1;
                 colour_grid[(row * size + col) as usize] = colour;
                 working_solution.push((row, col, colour));
-                get_neighbours(colour_grid, &mut queue, &mut seen, row, col, size);
+                get_neighbours(colour_grid, &mut queue, &mut seen, row, col, size, colour_counter);
                 if colour_grid_recursively(
                     colour_grid,
                     queue.clone(),
                     seen.clone(),
                     size,
                     working_solution,
+                    colour_counter,
+                    impossible_routes_found
                 ) {
                     return true;
                 }
+                *colour_counter.entry(colour).or_insert(0) -= 1;
+                if *impossible_routes_found >= 1000{
+                    return false;
+                }
+
             }
             // if we don't find a valid layout with this colour, we try other colours
         }
         // if we don't find a valid layout with this cell and the cell's neighbours all exist then we have found a dead end, and must go back
         if all_neighbours_found(&colour_grid, row, col, size) {
+            *impossible_routes_found+=1;
+            println!("{}",impossible_routes_found);
             return false;
         }
-        //otherwise we push it to the back the the queue to be checked later
-        queue.push((row, col));
+        // // otherwise we push it to the back the the queue to be checked later
+        // if colour_grid[(row * size + col) as usize] == 0 {
+        //     // only retry later if still uncoloured AND new info may exist
+        //     queue.push_back((row, col));
+        // }
+
     }
     // if we get to this point, we have checked everything in the queue and assumedly have coloured in the grid appropriately
-    return true;
+    return false;
 }
 
 /// This function counts the solutions.
