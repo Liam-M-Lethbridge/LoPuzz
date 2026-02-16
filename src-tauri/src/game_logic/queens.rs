@@ -14,6 +14,7 @@ pub fn generate_grid(grid_size: u32) -> Vec<u32> {
         return vec![0; (grid_size * grid_size) as usize];
     }
 }
+
 /// This function recursively adds a new queen along the current row, asserting it does not break the rules.
 /// - grid: the current state of the grid.
 /// - row: the row of the next queen to add.
@@ -38,6 +39,7 @@ fn add_row(grid: &mut Vec<u32>, row: u32, size: u32) -> bool {
     }
     return false;
 }
+
 /// this function checks if the set of queens is a valid solution
 /// - grid: the current state of the grid.
 /// - row: the row of the most recent queen addition.
@@ -71,9 +73,8 @@ fn smallest_colours(colour_counter: &HashMap<u32, u32>) -> Vec<u32> {
 
     items.sort_by_key(|(_, count)| *count);
 
-    items.iter().take(1).map(|(c, _)| *c).collect()
+    items.iter().take(2).map(|(c, _)| *c).collect()
 }
-
 
 /// this function locates the nearby uncoloured cells.
 /// - colour_grid: the grid of colours.
@@ -169,6 +170,7 @@ pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> Ve
     // let idx = rng().random_range(0..colours.len());
     return colours;
 }
+
 /// this function prints the grid.
 /// - grid: the grid.
 /// - size: the size of the grid.
@@ -199,7 +201,6 @@ pub fn colour_grid_recursively(
     colour_counter: &mut HashMap<u32, u32>,
     impossible_routes_found: &mut u32
 ) -> bool {
-    println!("skib");
     // For each new colour, we need to QUICKLY check if it adds a new solution.
     // to quickly check, force the cell to have queen. From working_solution, construct subset which only contain possible queens.
     // initialise construction and push cell (row, column, colour) to it
@@ -225,7 +226,6 @@ pub fn colour_grid_recursively(
         //     queue.push((row, col));
         //     continue;
         // }
-        println!("ayo wtf");
         let mut colours: Vec<u32> = find_colours(colour_grid, row, col, size);
         colours.shuffle(&mut rng());
         for colour in colours {
@@ -284,7 +284,6 @@ pub fn colour_grid_recursively(
         // if we don't find a valid layout with this cell and the cell's neighbours all exist then we have found a dead end, and must go back
         if all_neighbours_found(&colour_grid, row, col, size) {
             *impossible_routes_found+=1;
-            println!("{}",impossible_routes_found);
             return false;
         }
         // // otherwise we push it to the back the the queue to be checked later
@@ -339,7 +338,7 @@ fn count_solutions(
 /// This function checks if two cells clash with one another
 /// - cell1: the first cell (row, col, colour)
 /// - cell2: the second cell (row, col, colour)
-fn check_clash(cell1: (u32, u32, u32), cell2: (u32, u32, u32)) -> bool {
+pub fn check_clash(cell1: (u32, u32, u32), cell2: (u32, u32, u32)) -> bool {
     let (row1, col1, colour1) = cell1;
     let (row2, col2, colour2) = cell2;
 

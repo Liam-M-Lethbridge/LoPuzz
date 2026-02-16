@@ -1,6 +1,8 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 mod game_logic;
+use crate::game_logic::queens;
+use crate::game_logic::queens::check_clash;
 use crate::game_logic::queens::colour_grid_recursively;
 use crate::game_logic::queens::generate_grid;
 use crate::game_logic::queens::get_neighbours;
@@ -15,7 +17,7 @@ use std::collections::VecDeque;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![create_queens_game])
+        .invoke_handler(tauri::generate_handler![create_queens_game, compare_solutions])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -76,4 +78,21 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
         }
     }
     return Vec::new();
+}
+
+#[tauri::command]
+/// This function checks if the solution sent bak is valid.
+/// - colour_grid: the grid of the colours.
+/// - solution: the indices of each queen
+fn compare_solutions(colour_grid: Vec<u32>, solution:Vec<u32>, size: u32) -> bool{
+    for i in 1..size as usize{
+        let cell1 = (solution[i]/size, solution[i]%size, colour_grid[solution[i] as usize]);
+        for j in 0..i{
+            let cell2 = (solution[j]/size, solution[j]%size, colour_grid[solution[j] as usize]);
+            if check_clash(cell1, cell2){
+                return  false;
+            }
+        }
+    }
+    return true;
 }
