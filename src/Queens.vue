@@ -6,7 +6,10 @@
   import XBox from "./components/icons/XBox.vue";
   import SelectBoxx from "./components/icons/SelectBoxx.vue";
 
-  const gridSize = 9; 
+  const gridSize = 4; 
+  const valid_solution = ref(false);
+
+
 
   function getBorders(index:number, grid:any, size: number) {
     const row = Math.floor(index / size);
@@ -72,11 +75,21 @@
   var invalids = ref(new Array(gridSize**2).fill(0));
   const grid = ref([]);
 
+  async function send_solution(){
+    var queens_indices = [];
+    for(let i = 0; i < gridSize**2; i++){
+      if( input.value[i] == 1){
+        queens_indices.push(i);
+      }
+    }
+  valid_solution.value = await invoke("compare_solutions", {"colourGrid":grid.value, "solution":queens_indices, "size":gridSize});
+
+}
+
   function findInvalids(newQueenIndex: number){
 
     const column = newQueenIndex%gridSize;
     const row = Math.floor(newQueenIndex/gridSize);
-    console.log(row, column)
     var counter = 0;
     // check column:
     for(let i = 0; i < gridSize; i++){
@@ -85,7 +98,6 @@
       }
     }
     if(counter >1){
-      console.log("column issue");
       for(let i = 0; i < gridSize; i++){
         invalids.value[column+gridSize*i] +=1;
       }
@@ -99,7 +111,6 @@
       }
     }
     if(counter >1){
-      console.log("row issue");
       for(let i = 0; i < gridSize; i++){
         invalids.value[row*gridSize+i] +=1;
       }
@@ -129,7 +140,6 @@
     for (const x of coordsAround){
       // if(newQueenIndex+x >=0 && newQueenIndex+x <gridSize**2){
         if(input.value[newQueenIndex+x] == 1){
-          console.log("nearby issue")
           invalids.value[newQueenIndex+x]+=1;
           invalids.value[newQueenIndex]+=1;
         // }
@@ -149,10 +159,16 @@
       }
     }
     if(counter >1){
-      console.log("colour issue")
       for(const colouredCell of colouredCells){
         invalids.value[colouredCell] +=1;
       }
+    }
+    if ((invalids.value.reduce((a, b) => {
+      return a+b;
+    }) == 0) && (input.value.reduce((a, b) => {
+      return a+b;
+    }) == gridSize)){
+      send_solution();
     }
   }
 
@@ -168,7 +184,6 @@
       }
     }
     if(counter >0){
-      console.log("column fix");
 
       for(let i = 0; i < gridSize; i++){
         invalids.value[column+gridSize*i] -=1;
@@ -183,7 +198,6 @@
       }
     }
     if(counter >0){
-      console.log("row fix");
       for(let i = 0; i < gridSize; i++){
         invalids.value[row*gridSize+i] -=1;
       }
@@ -219,7 +233,6 @@
     for (const x of coordsAround){
       
       if(input.value[newQueenIndex+x] == 1){
-        console.log("nearby fix");
         invalids.value[newQueenIndex+x]-=1;
         invalids.value[newQueenIndex]-=1;
         
@@ -238,10 +251,16 @@
       }
     }
     if(counter >0){
-      console.log("colour fix");
       for(const colouredCell of colouredCells){
         invalids.value[colouredCell] -=1;
       }
+    }
+    if ((invalids.value.reduce((a, b) => {
+      return a+b;
+    }) == 0) && (input.value.reduce((a, b) => {
+      return a+b;
+    }) == gridSize)){
+      send_solution();
     }
   }
 
@@ -315,15 +334,19 @@
         findInvalids(i);
       }else if(j == 1){removeInvalids(i)}
     }
-    console.log(invalids.value)
+  }
+  async function onFadeComplete(){
+    await newGrid();
+    valid_solution.value = false;
   }
 
 </script>
 
 <template>
   <div class="background">
-    <button @click="newGrid"></button>
-    <div class="square">
+    <!-- <button @click="newGrid"></button> -->
+    <transition name="fade" @after-leave="onFadeComplete">
+    <div class="square" v-show="valid_solution == false">
       <div
         class="grid"
         :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }"
@@ -350,6 +373,7 @@
         </div>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 
@@ -393,6 +417,7 @@
   justify-content: center; 
   align-items: center;
 }
+
 .cell svg {
   position: absolute;
   inset: 0;
@@ -412,6 +437,16 @@
 .cell.left {
   border-left: 2px solid black;
 }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 
 </style>
 
