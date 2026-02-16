@@ -96,3 +96,9 @@ fn compare_solutions(colour_grid: Vec<u32>, solution:Vec<u32>, size: u32) -> boo
     }
     return true;
 }
+
+
+#[tauri::command]
+fn create_shapes_game(grid_size: u32){
+    
+}
