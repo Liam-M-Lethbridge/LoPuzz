@@ -6,8 +6,8 @@
   import XBox from "./components/icons/XBox.vue";
   import SelectBoxx from "./components/icons/SelectBoxx.vue";
 
-  const gridSize = 4; 
-  const valid_solution = ref(false);
+  const gridSize = 6; 
+  const valid_solution = ref<Boolean>(false);
 
 
 
@@ -66,14 +66,14 @@
     };
   }
 
-  function findColour(cell: never){
+  function findColour(cell: number){
     return colourMap[cell];
     
   }
 
-  var input = ref(new Array(gridSize**2).fill(0));
-  var invalids = ref(new Array(gridSize**2).fill(0));
-  const grid = ref([]);
+  var input = ref<number[]>(new Array(gridSize**2).fill(0));
+  var invalids = ref<number[]>(new Array(gridSize**2).fill(0));
+  var grid = ref<number[]>([]);
 
   async function send_solution(){
     var queens_indices = [];
@@ -163,9 +163,10 @@
         invalids.value[colouredCell] +=1;
       }
     }
+
     if ((invalids.value.reduce((a, b) => {
       return a+b;
-    }) == 0) && (input.value.reduce((a, b) => {
+    }) == 0) && (input.value.filter(b => {return b == 1;}).reduce((a, b) => {
       return a+b;
     }) == gridSize)){
       send_solution();
@@ -255,9 +256,12 @@
         invalids.value[colouredCell] -=1;
       }
     }
+    if (input.value.filter(a => {return a == 1;}).length == 0){
+      return;
+    }
     if ((invalids.value.reduce((a, b) => {
       return a+b;
-    }) == 0) && (input.value.reduce((a, b) => {
+    }) == 0) && (input.value.filter(a => {return a == 1;}).reduce((a, b) => {
       return a+b;
     }) == gridSize)){
       send_solution();
@@ -266,9 +270,9 @@
 
   async function newGrid(){
     grid.value = await invoke("create_queens_game", { gridSize })
-    input = ref(new Array(gridSize**2).fill(0));
-    position = ref(gridSize*gridSize);
-    invalids = ref(new Array(gridSize**2).fill(0));
+    input = ref<number[]>(new Array(gridSize**2).fill(0));
+    position = ref<number>(gridSize*gridSize);
+    invalids = ref<number[]>(new Array(gridSize**2).fill(0));
   }
 
   onMounted(async () => {
@@ -298,9 +302,14 @@
         e.preventDefault()
         toggle(position.value, 2);
       }
-      else if (e.key == "r"){
+      else if (e.key == "r"){//remove this when no longer needed for debugging
         e.preventDefault()
         newGrid();
+      }
+      else if (e.key == "c"){
+      e.preventDefault()
+      input.value.fill(0);
+      invalids.value.fill(0);
       }
     })
 
