@@ -1,8 +1,7 @@
 use std::collections::HashSet;
 use std::vec;
-use rand::{fill, rng};
-use rand::seq::{SliceRandom, index};
-use serde::de::value;
+use rand::{rng};
+use rand::seq::{SliceRandom};
 
 pub fn generate_shapes_grid(size: u32) -> Vec<u32>{
     let mut grid = vec![0; (size * size) as usize];
@@ -16,6 +15,9 @@ pub fn generate_shapes_grid(size: u32) -> Vec<u32>{
 /// - grid: the current grid state.
 /// i size: the size of the grid.
 fn fill_grid(grid: &mut Vec<u32>, size: usize, index:usize) -> bool{
+    if index == size*size{
+        return true;
+    }
     let mut possible_values: Vec<u32> = valid_placements(grid, index/size, index%size, size).into_iter().collect();
     possible_values.shuffle(&mut rng());
     for value in possible_values{
@@ -53,11 +55,23 @@ fn valid_placements(grid: & Vec<u32>, row: usize, col: usize, size: usize) -> Ha
         }
         values.remove(&grid[(row-index)*size+(col-index)]);
     }
-        for index in 1..size{
-        if col+index >size || row+index > size{
+    for index in 1..size{
+        if col+index >= size || row+index >= size{
             break;
         }
         values.remove(&grid[(row+index)*size+(col+index)]);
+    }
+    for index in 1..size{
+        if col < index  || row + index >=size {
+            break;
+        }
+        values.remove(&grid[(row+index)*size+(col-index)]);
+    }
+    for index in 1..size{
+        if col+index >= size || row < index {
+            break;
+        }
+        values.remove(&grid[(row-index)*size+(col+index)]);
     }
     return values;
 }

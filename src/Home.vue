@@ -9,13 +9,12 @@
   function toGame(game:string){
     router.push(game);
   }
-
-
 </script>
 
 <template>
   <div class="background">
       <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
+      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/shapes')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
   </div>
 </template>
 
