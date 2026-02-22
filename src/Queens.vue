@@ -415,7 +415,6 @@
   height: 100%;
   border: 4px solid #000000;
   border-radius: 1%;
-  /* z-index: -2; */
 }
 .cell{
   display: flex;

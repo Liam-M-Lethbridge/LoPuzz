@@ -1,14 +1,16 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 mod game_logic;
-use crate::game_logic::queens;
 use crate::game_logic::queens::check_clash;
 use crate::game_logic::queens::colour_grid_recursively;
 use crate::game_logic::queens::generate_grid;
 use crate::game_logic::queens::get_neighbours;
+use crate::game_logic::numbers::generate_numbers_grid;
+use crate::game_logic::numbers::remove_values;
+use crate::game_logic::utilities::print_grid;
+
 
 use rand::{rng, seq::SliceRandom};
-use serde::ser::Impossible;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -17,7 +19,7 @@ use std::collections::VecDeque;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![create_queens_game, compare_solutions])
+        .invoke_handler(tauri::generate_handler![create_queens_game, compare_solutions, create_numbers_game])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -26,7 +28,7 @@ pub fn run() {
 /// This function creates a queens game, giving a coloured grid with a unique single solution.
 /// - grid_size: the size of the grid to generate.
 fn create_queens_game(grid_size: u32) -> Vec<u32> {
-    while true {
+    loop {
         println!("new grid");
         let queens_grid = generate_grid(grid_size);
 
@@ -77,7 +79,6 @@ fn create_queens_game(grid_size: u32) -> Vec<u32> {
             return colour_grid;
         }
     }
-    return Vec::new();
 }
 
 #[tauri::command]
@@ -95,4 +96,12 @@ fn compare_solutions(colour_grid: Vec<u32>, solution:Vec<u32>, size: u32) -> boo
         }
     }
     return true;
+}
+
+
+#[tauri::command]
+fn create_numbers_game(grid_size: u32, difficulty: u32) -> Vec<u32>{
+    let grid = remove_values(&generate_numbers_grid(grid_size), difficulty, grid_size);
+
+    return grid;
 }

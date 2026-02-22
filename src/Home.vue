@@ -3,19 +3,19 @@
   import { invoke } from "@tauri-apps/api/core";
   import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
+import numbersBox from "./components/icons/numbersBox.vue";
 
   const hover = ref(false);
   const router = useRouter();
   function toGame(game:string){
     router.push(game);
   }
-
-
 </script>
 
 <template>
   <div class="background">
-      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
+      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
+      <numbersBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/numbers')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
   </div>
 </template>
 
@@ -33,6 +33,9 @@
   background: linear-gradient(#223d75,#193e8f)
 }
 .QueenSquare:hover{
+  background-color: #dca8e0;;
+}
+.numbersSquare:hover{
   background-color: #dca8e0;;
 }
 

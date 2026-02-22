@@ -1,7 +1,7 @@
 use std::vec;
 
 use rand::rng;
-use rand::{random_range, seq::SliceRandom};
+use rand::{seq::SliceRandom};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 /// This function generates a grid of queen locations in which no two queens exist in the same row or column and no two queens lie within one square of one another.
@@ -171,21 +171,7 @@ pub fn find_colours(colour_grid: &Vec<u32>, row: u32, col: u32, size: u32) -> Ve
     return colours;
 }
 
-/// this function prints the grid.
-/// - grid: the grid.
-/// - size: the size of the grid.
-pub fn print_grid(grid: Vec<u32>, size: u32){
-    println!();
-    for r in 0..size {
-        for c in 0..size {
-            print!(
-                "{} ",
-                grid[(r * size + c) as usize]
-            );
-        }
-        println!();
-    }
-}
+
 
 /// This function colours in the grid recursively, resulting in a single solution.
 /// - colour_grid: the coloured grid we use.
