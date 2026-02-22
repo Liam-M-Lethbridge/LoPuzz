@@ -88,13 +88,7 @@ pub fn remove_values(grid: & Vec<u32>, difficulty: u32, size: u32) -> Vec<u32>{
 
     let shape_row_columns = get_row_columns(grid, size);
 
-    for shape in shape_row_columns.keys(){
-        print!("{}: ", shape);
-        for (row, col) in shape_row_columns[shape].clone(){
-            print!("({}, {})   ", row, col);
-        }
-        println!();
-    }
+    
     let mut solution: Vec<(u32, u32)> = Vec::new();
     asymmetric_grid_fill(&grid, &shape_row_columns, &mut solution, size);
 
