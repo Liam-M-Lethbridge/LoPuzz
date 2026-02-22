@@ -3,6 +3,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
+import ShapesBox from "./components/icons/ShapesBox.vue";
 
   const hover = ref(false);
   const router = useRouter();
@@ -13,8 +14,8 @@
 
 <template>
   <div class="background">
-      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
-      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/shapes')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"></QueenBox>
+      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
+      <ShapesBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/shapes')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
   </div>
 </template>
 
@@ -32,6 +33,9 @@
   background: linear-gradient(#223d75,#193e8f)
 }
 .QueenSquare:hover{
+  background-color: #dca8e0;;
+}
+.ShapesSquare:hover{
   background-color: #dca8e0;;
 }
 
