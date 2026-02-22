@@ -6,6 +6,7 @@ use crate::game_logic::queens::colour_grid_recursively;
 use crate::game_logic::queens::generate_grid;
 use crate::game_logic::queens::get_neighbours;
 use crate::game_logic::shapes::generate_shapes_grid;
+use crate::game_logic::shapes::remove_values;
 use crate::game_logic::utilities::print_grid;
 
 
@@ -99,8 +100,8 @@ fn compare_solutions(colour_grid: Vec<u32>, solution:Vec<u32>, size: u32) -> boo
 
 
 #[tauri::command]
-fn create_shapes_game(grid_size: u32) -> Vec<u32>{
-    let grid = generate_shapes_grid(grid_size);
-    print_grid(grid.clone(), grid_size);
+fn create_shapes_game(grid_size: u32, difficulty: u32) -> Vec<u32>{
+    let grid = remove_values(&generate_shapes_grid(grid_size), difficulty, grid_size);
+
     return grid;
 }

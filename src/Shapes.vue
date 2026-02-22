@@ -13,7 +13,7 @@ import HexagonIcon from './components/icons/HexagonIcon.vue';
     var position = ref<number>(0);
 
     async function newGrid(){
-        grid.value = await invoke("create_shapes_game", { gridSize })
+        grid.value = await invoke("create_shapes_game", { "gridSize":gridSize, "difficulty":0 })
         input = ref<number[]>(new Array(gridSize**2).fill(0));
         position = ref<number>(gridSize*gridSize);
         invalids = ref<number[]>(new Array(gridSize**2).fill(0));
