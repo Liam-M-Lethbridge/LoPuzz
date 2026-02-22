@@ -1,3 +1,3 @@
 pub mod queens;
-pub mod shapes;
+pub mod numbers;
 pub mod utilities;

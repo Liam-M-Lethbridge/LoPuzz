@@ -1,8 +1,8 @@
 <script setup>
-  import StarIcon from "./StarIcon.vue";
+  import StarIcon from "./numbers/Five.vue";
 </script>
 <template>
-    <div class="ShapesSquare">
+    <div class="numbersSquare">
         <svg viewBox="0 0 100 100" style="height:60%; width:60%;" y="1em">
             <StarIcon/>
         </svg>
@@ -10,7 +10,7 @@
 </template>
 
 <style scoped>
-.ShapesSquare{
+.numbersSquare{
   display: flex;
   justify-content: center;
   align-items: center;

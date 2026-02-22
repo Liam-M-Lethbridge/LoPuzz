@@ -1,29 +1,31 @@
 <script setup lang="ts">
-    import CircleIcon from './components/icons/CircleIcon.vue';
-    import StarIcon from './components/icons/StarIcon.vue';
-    import SquareIcon from './components/icons/SquareIcon.vue';
-    import TriangleIcon from './components/icons/TriangleIcon.vue';
     import { ref, onMounted } from 'vue';
     import { invoke } from '@tauri-apps/api/core';
-import HexagonIcon from './components/icons/HexagonIcon.vue';
-import SelectBoxx from './components/icons/SelectBoxx.vue';
-    var gridSize = 5;
+    import SelectBoxx from './components/icons/SelectBoxx.vue';
+    import Five from './components/icons/numbers/Five.vue';
+    import One from './components/icons/numbers/One.vue';
+    import Two from './components/icons/numbers/Two.vue';
+import Three from './components/icons/numbers/Three.vue';
+import Four from './components/icons/numbers/Four.vue';
+import Six from './components/icons/numbers/Six.vue';
+import Seven from './components/icons/numbers/Seven.vue';
+    var gridSize = 7;
     var grid = ref<number[]>([]);
     var input = ref<number[]>([]);
     var invalids = ref<number[]>([]);
     var position = ref<number>(0);
 
     async function newGrid(){
-        grid.value = await invoke("create_shapes_game", { "gridSize":gridSize, "difficulty":0 })
+        grid.value = await invoke("create_numbers_game", { "gridSize":gridSize, "difficulty":2 })
         input = ref<number[]>(new Array(gridSize**2).fill(0));
         position = ref<number>(gridSize*gridSize);
         invalids = ref<number[]>(new Array(gridSize**2).fill(0));
     }
 
-    function toggle(i: number){
-    input.value[i] = input.value[i]+1;
-    if(input.value[i] > gridSize){
-        input.value[i] =0;
+    function toggle(i: number, value: number){
+    
+    if(input.value[i] <= gridSize){
+      input.value[i] = value;
     }
 
     
@@ -62,10 +64,31 @@ import SelectBoxx from './components/icons/SelectBoxx.vue';
         e.preventDefault()
         move(1);
       }
-
+      else if (e.key == "1"){
+        e.preventDefault()
+        toggle(position.value, 1);
+    }else if (e.key == "2"){
+        e.preventDefault()
+        toggle(position.value, 2);
+    }else if (e.key == "3"){
+        e.preventDefault()
+        toggle(position.value, 3);
+    }else if (e.key == "4"){
+        e.preventDefault()
+        toggle(position.value, 4);
+    }else if (e.key == "5"){
+        e.preventDefault()
+        toggle(position.value, 5);
+    }else if (e.key == "6"){
+        e.preventDefault()
+        toggle(position.value, 6);
+    }else if (e.key == "7"){
+        e.preventDefault()
+        toggle(position.value, 7);
+    }
       else if (e.key == " "){
         e.preventDefault()
-        toggle(position.value);
+        toggle(position.value, 0);
     }
 
   
@@ -78,6 +101,13 @@ function get_grid_value(index: number){
         return grid.value[index];
     }
     return input.value[index];
+}
+
+function findColour(index: number){
+    if (grid.value[index] == 0){
+        return "#FFFFFF";
+    }
+    return "#d7d6d6"
 }
 </script>
 
@@ -92,25 +122,31 @@ function get_grid_value(index: number){
           v-for="(cell, i) in grid"
           :key="i"
           class="cell"
-          @click.shift="position=i; toggle(i)"
-          @click.exact="position=i; toggle(i)">
-        <svg v-if="get_grid_value(i) === 1" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
-            <CircleIcon/>
+          :style="{ backgroundColor: findColour(i) }"
+          @click.exact="position=i;">        
+          <svg v-if="get_grid_value(i) === 1" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
+            <One/>
         </svg>
         <svg v-if="get_grid_value(i) === 2" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
-            <TriangleIcon/>
+            <Two/>
         </svg>
           <svg v-if="get_grid_value(i) === 3" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
-            <SquareIcon/>
+            <Three/>
         </svg>
           <svg v-if="get_grid_value(i) === 4" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
-            <StarIcon/>
+            <Four/>
         </svg>
-            <svg v-if="get_grid_value(i) === 5" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
-            <HexagonIcon/>
+        <svg v-if="get_grid_value(i) === 5" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
+            <Five/>
         </svg>
-        <svg v-if="position===i" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 3;">
-            <SelectBoxx/>
+        <svg v-if="get_grid_value(i) === 6" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
+            <Six/>
+        </svg>
+        <svg v-if="get_grid_value(i) === 7" viewBox="0 0 100 100" style="height:60%; width:60%; z-index: 2;">
+            <Seven/>
+        </svg>
+        <svg v-if="position===i" viewBox="0 0 20 20" style="height:90%; width:90%; z-index: 3;" >
+            <SelectBoxx :colour="grid[i] != 0? 'white' : '#d7e6ff'"/>
           </svg>
         </div>
       </div>

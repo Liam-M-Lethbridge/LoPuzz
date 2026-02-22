@@ -3,9 +3,9 @@ use std::vec;
 use rand::{random, random_range, rng};
 use rand::seq::{SliceRandom};
 
-/// Thisnfunction generates a shapes grid.
+/// Thisnfunction generates a numbers grid.
 /// - size: the size of the grid generated.
-pub fn generate_shapes_grid(size: u32) -> Vec<u32>{
+pub fn generate_numbers_grid(size: u32) -> Vec<u32>{
     let mut grid = vec![0; (size * size) as usize];
     if fill_grid(&mut grid, size as usize, 0){
         return grid;
@@ -83,7 +83,7 @@ fn valid_placements(grid: & Vec<u32>, row: usize, col: usize, size: usize) -> Ha
 /// - diffuculty: the difficulty setting.
 ///  - size: the size of the grid.
 pub fn remove_values(grid: & Vec<u32>, difficulty: u32, size: u32) -> Vec<u32>{
-    // we first find a configuration for the minimum number of shapes.
+    // we first find a configuration for the minimum number of numbers.
     // as long as it isn't symmetrical, the solution should be unique.
 
     let shape_row_columns = get_row_columns(grid, size);
@@ -137,7 +137,7 @@ fn get_row_columns(grid: & Vec<u32>, size: u32) -> HashMap<u32, Vec<(u32,u32)>> 
     return row_columns;
 }
 
-/// This function recursively adds new shapes to an empty grid until we have a non-symmetric grid with one of each shape.
+/// This function recursively adds new numbers to an empty grid until we have a non-symmetric grid with one of each shape.
 fn asymmetric_grid_fill(grid: & Vec<u32>, shape_row_columns: & HashMap<u32, Vec<(u32, u32)>>, solution:&mut Vec<(u32, u32)>, size: u32) -> bool{
     if solution.len() == size as usize{
         if check_symmetry(&solution, size){
@@ -247,7 +247,7 @@ fn check_symmetry(solution:& Vec<(u32, u32)>, size: u32) -> bool{
 
 #[cfg(test)]
 mod tests {
-    use crate::game_logic::shapes::check_symmetry;
+    use crate::game_logic::numbers::check_symmetry;
 
     use super::*;
     #[test]
