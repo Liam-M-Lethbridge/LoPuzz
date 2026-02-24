@@ -5,11 +5,12 @@
     import Five from './components/icons/numbers/Five.vue';
     import One from './components/icons/numbers/One.vue';
     import Two from './components/icons/numbers/Two.vue';
-import Three from './components/icons/numbers/Three.vue';
-import Four from './components/icons/numbers/Four.vue';
-import Six from './components/icons/numbers/Six.vue';
-import Seven from './components/icons/numbers/Seven.vue';
-    var gridSize = 7;
+    import Three from './components/icons/numbers/Three.vue';
+    import Four from './components/icons/numbers/Four.vue';
+    import Six from './components/icons/numbers/Six.vue';
+    import MenuButton from './components/MenuButton.vue';
+    import Seven from './components/icons/numbers/Seven.vue';
+    var gridSize = 5;
     var grid = ref<number[]>([]);
     var input = ref<number[]>([]);
     var invalids = ref<number[]>([]);
@@ -113,6 +114,7 @@ function findColour(index: number){
 
 <template>
     <div class="background">
+    <MenuButton/>
     <div class="square">
       <div
         class="grid"

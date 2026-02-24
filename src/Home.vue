@@ -3,7 +3,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import QueenBox from "./components/icons/QueenBox.vue";
   import { useRouter } from "vue-router";
-import numbersBox from "./components/icons/numbersBox.vue";
+  import numbersBox from "./components/icons/numbersBox.vue";
 
   const hover = ref(false);
   const router = useRouter();

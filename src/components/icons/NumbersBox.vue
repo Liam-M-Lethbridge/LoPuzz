@@ -19,7 +19,5 @@
   border-radius: 20%;
   top:4px; 
   left:30px;
-  animation-duration: 6s;
-  animation-iteration-count: infinite;
 }
 </style>
