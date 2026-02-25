@@ -1,26 +1,37 @@
 <script setup lang="ts">
-  import { ref, onMounted } from "vue";
-  import { invoke } from "@tauri-apps/api/core";
-  import QueenBox from "./components/icons/QueenBox.vue";
-  import { useRouter } from "vue-router";
-  import numbersBox from "./components/icons/numbersBox.vue";
+import { ref, onMounted } from "vue";
+import { invoke } from "@tauri-apps/api/core";
+import QueenBox from "./components/icons/QueenBox.vue";
+import { useRouter } from "vue-router";
+import numbersBox from "./components/icons/numbersBox.vue";
 
-  const hover = ref(false);
-  const router = useRouter();
-  function toGame(game:string){
-    router.push(game);
-  }
+const hover = ref(false);
+const router = useRouter();
+function toGame(game: string) {
+  router.push(game);
+}
 </script>
 
 <template>
   <div class="background">
-      <QueenBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/queens')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
-      <numbersBox style="height:min(40vh, 40vw);width:min(40vh, 40vw);" @click="toGame('/numbers')" @mouseover="hover = true" @mouseleave="hover = false" :style="{ active: hover }"/>
+    <QueenBox
+      style="height: min(40vh, 40vw); width: min(40vh, 40vw)"
+      @click="toGame('/queens')"
+      @mouseover="hover = true"
+      @mouseleave="hover = false"
+      :style="{ active: hover }"
+    />
+    <numbersBox
+      style="height: min(40vh, 40vw); width: min(40vh, 40vw)"
+      @click="toGame('/numbers')"
+      @mouseover="hover = true"
+      @mouseleave="hover = false"
+      :style="{ active: hover }"
+    />
   </div>
 </template>
 
 <style scoped>
-
 .background {
   display: flex;
   justify-content: center;
@@ -30,22 +41,21 @@
   height: 100vh;
 
   /* background-color: white; */
-  background: linear-gradient(#223d75,#193e8f)
+  background: linear-gradient(#223d75, #193e8f);
 }
-.QueenSquare:hover{
-  background-color: #dca8e0;;
+.QueenSquare:hover {
+  background-color: #dca8e0;
 }
-.numbersSquare:hover{
-  background-color: #dca8e0;;
+.numbersSquare:hover {
+  background-color: #dca8e0;
 }
 
-.grid{
+.grid {
   display: grid;
   width: 100%;
   height: 100%;
 }
-.cell{
+.cell {
   aspect-ratio: 1 / 1;
 }
 </style>
-

@@ -1,5 +1,6 @@
 <template>
-    <polygon points="
+  <polygon
+    points="
     20 10, 
     80 10,
     80 25,
@@ -11,15 +12,18 @@
     20 75,
     65 75,
     65 57,
-    20 57," 
-    :fill="colour" stroke="black" stroke-width="4"  />
+    20 57,"
+    :fill="colour"
+    stroke="black"
+    stroke-width="4"
+  />
 </template>
 
 <script setup>
 defineProps({
   colour: {
     type: String,
-    default: "oklch(0.8412 0.0839 203.78)"
-  }
-})
+    default: "oklch(0.8412 0.0839 203.78)",
+  },
+});
 </script>

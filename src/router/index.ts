@@ -1,26 +1,22 @@
-import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createWebHashHistory,
+  type RouteRecordRaw,
+} from "vue-router";
 import HomePage from "../Home.vue";
 import Queens from "../Queens.vue";
 import numbers from "../numbers.vue";
-import StartPage from '../StartPage.vue';
+import StartPage from "../StartPage.vue";
 const routes: RouteRecordRaw[] = [
-  {path: "/",
-    component: StartPage
-  },  
-  {path: "/home",
-    component: HomePage
-  },
-  {path: "/queens",
-    component: Queens
-  },
-  {path: "/numbers",
-    component: numbers
-  },
-]
+  { path: "/", component: StartPage },
+  { path: "/home", component: HomePage },
+  { path: "/queens", component: Queens },
+  { path: "/numbers", component: numbers },
+];
 
 export const router = createRouter({
   history: createWebHashHistory(),
   routes,
-})
+});
 
-export default router
+export default router;

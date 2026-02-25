@@ -1,0 +1,6 @@
+# Ignore artifacts:
+.vscode/
+node_modules/
+public/
+README.md
+src-tauri/

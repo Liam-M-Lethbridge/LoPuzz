@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import MenuButton from './MenuButton.vue';
+import { ref } from "vue";
+import MenuButton from "./MenuButton.vue";
 import { useRouter } from "vue-router";
-import HomeButton from './HomeButton.vue';
+import HomeButton from "./HomeButton.vue";
 const router = useRouter();
 
 let active = ref(false);
-function toggle(){
-    active.value = !active.value;
+function toggle() {
+  active.value = !active.value;
 }
 </script>
 
@@ -20,7 +20,6 @@ function toggle(){
     <MenuButton @click="toggle" />
   </div>
 </template>
-
 
 <style scoped>
 .menu-wrapper {
@@ -42,13 +41,11 @@ function toggle(){
 }
 
 .menu {
-    display: flex;
+  display: flex;
   width: 40vw;
   height: 100vh;
-  background-color: #DDDDDD;
+  background-color: #dddddd;
   border-right: 4px solid black;
   justify-content: center;
-
 }
-
 </style>
