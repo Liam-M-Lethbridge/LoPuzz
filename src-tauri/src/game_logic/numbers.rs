@@ -104,7 +104,7 @@ pub fn remove_values(grid: & Vec<u32>, difficulty: u32, size: u32) -> Vec<u32>{
     else if difficulty == 1{
         n_additions = random_range(size/2..size);
     }// if difficultty is hard
-    else if difficulty == 0{
+    else if difficulty == 2{
         n_additions = random_range(0..size/2);
     }
 
@@ -123,7 +123,7 @@ pub fn remove_values(grid: & Vec<u32>, difficulty: u32, size: u32) -> Vec<u32>{
     return return_grid;
 }
 
-/// This function finds the row and column indicies for the 
+/// This function finds the row and column indicies for each of the numbers
 fn get_row_columns(grid: & Vec<u32>, size: u32) -> HashMap<u32, Vec<(u32,u32)>> {
     let mut row_columns: HashMap<u32, Vec<(u32,u32)>> = HashMap::new();
     for i in 1..size+1{

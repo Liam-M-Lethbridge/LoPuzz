@@ -10,7 +10,7 @@
     import Six from './components/icons/numbers/Six.vue';
     import MenuButton from './components/MenuButton.vue';
     import Seven from './components/icons/numbers/Seven.vue';
-import Menu from './components/Menu.vue';
+    import Menu from './components/Menu.vue';
     var gridSize = 5;
     var grid = ref<number[]>([]);
     var input = ref<number[]>([]);
