@@ -10,6 +10,7 @@
     import Six from './components/icons/numbers/Six.vue';
     import MenuButton from './components/MenuButton.vue';
     import Seven from './components/icons/numbers/Seven.vue';
+import Menu from './components/Menu.vue';
     var gridSize = 5;
     var grid = ref<number[]>([]);
     var input = ref<number[]>([]);
@@ -114,7 +115,7 @@ function findColour(index: number){
 
 <template>
     <div class="background">
-    <MenuButton/>
+    <Menu/>
     <div class="square">
       <div
         class="grid"
