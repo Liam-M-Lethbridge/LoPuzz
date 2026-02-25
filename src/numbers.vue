@@ -8,16 +8,16 @@ import Two from "./components/icons/numbers/Two.vue";
 import Three from "./components/icons/numbers/Three.vue";
 import Four from "./components/icons/numbers/Four.vue";
 import Six from "./components/icons/numbers/Six.vue";
-import MenuButton from "./components/MenuButton.vue";
 import Seven from "./components/icons/numbers/Seven.vue";
 import Menu from "./components/Menu.vue";
+import ErrorBox from "./components/icons/ErrorBox.vue";
 var gridSize = 5;
 var grid = ref<number[]>([]);
 var input = ref<number[]>([]);
 var invalids = ref<number[]>([]);
 var position = ref<number>(0);
 
-/** This function asks the server to create a new grid and resets the relevant variables */
+/** This function asks the server to create a new grid and resets the relevant variables. */
 async function newGrid() {
   grid.value = await invoke("create_numbers_game", {
     gridSize: gridSize,
@@ -28,13 +28,24 @@ async function newGrid() {
   invalids = ref<number[]>(new Array(gridSize ** 2).fill(0));
 }
 
-/** This function asks the server to create a new grid and resets the relevant variables */
+/** This function toggles the value of the cell to a number.
+ * @param {number} i -The index of the cell.
+ * @param {number} value -The value it needs to be changed to.
+ */
 function toggle(i: number, value: number) {
+  if (getGridValue(i) != 0) {
+    fixClashes(i, getGridValue(i));
+  }
   if (input.value[i] <= gridSize) {
     input.value[i] = value;
   }
+  if (getGridValue(i) != 0) {
+    findClashes(i, getGridValue(i));
+  }
 }
-
+/** This function moves the selector icon to a different cell.
+ * @param {number} dir -The number indicating the shift.
+ */
 function move(dir: number) {
   if (position.value == gridSize * gridSize) {
     position.value = 0;
@@ -51,6 +62,8 @@ function move(dir: number) {
     position.value = position.value + dir;
   }
 }
+
+// For user input
 onMounted(async () => {
   newGrid();
   window.addEventListener("keydown", (e) => {
@@ -94,18 +107,143 @@ onMounted(async () => {
   });
 });
 
-function get_grid_value(index: number) {
+/** This function gets the number for the cell.
+ * @param {number} index -The index of the cell.
+ * @returns {number} The number.
+ */
+function getGridValue(index: number) {
   if (grid.value[index] != 0) {
     return grid.value[index];
   }
   return input.value[index];
 }
-
+/** This function gets the background colour for the cell.
+ * @param {number} index -The index of the cell.
+ * @returns {string} The colour.
+ */
 function findColour(index: number) {
   if (grid.value[index] == 0) {
     return "#FFFFFF";
   }
   return "#d7d6d6";
+}
+
+/** This function updates any clashing cells. */
+function findClashes(index: number, newValue: number) {
+  const row = Math.floor(index / gridSize);
+  const col = index % gridSize;
+
+  for (let i = 0; i < gridSize; i++) {
+    // check along row
+    if (
+      getGridValue(row * gridSize + i) == newValue &&
+      row * gridSize + i != index
+    ) {
+      console.log("row");
+      invalids.value[row * gridSize + i] += 1;
+      invalids.value[index] += 1;
+    }
+    // check along column
+    if (
+      getGridValue(gridSize * i + col) == newValue &&
+      gridSize * i + col != index
+    ) {
+      console.log("column");
+      invalids.value[gridSize * i + col] += 1;
+      invalids.value[index] += 1;
+    }
+  }
+  // check along diagonals
+  for (let i = 1; i < gridSize; i++) {
+    if (row - i >= 0) {
+      if (col - i >= 0) {
+        if (getGridValue((row - i) * gridSize + (col - i)) == newValue) {
+          console.log("up left");
+          invalids.value[(row - i) * gridSize + (col - i)] += 1;
+          invalids.value[index] += 1;
+        }
+      }
+      if (col + i < gridSize) {
+        if (getGridValue((row - i) * gridSize + (col + i)) == newValue) {
+          console.log("up right");
+          invalids.value[(row - i) * gridSize + (col + i)] += 1;
+          invalids.value[index] += 1;
+        }
+      }
+    }
+    if (row + i < gridSize) {
+      if (col - i >= 0) {
+        if (getGridValue((row + i) * gridSize + (col - i)) == newValue) {
+          console.log("down left");
+          invalids.value[(row + i) * gridSize + (col - i)] += 1;
+          invalids.value[index] += 1;
+        }
+      }
+      if (col + i < gridSize) {
+        if (getGridValue((row + i) * gridSize + (col + i)) == newValue) {
+          console.log("down right");
+          invalids.value[(row + i) * gridSize + (col + i)] += 1;
+          invalids.value[index] += 1;
+        }
+      }
+    }
+  }
+}
+
+/** This function updates any previously-clashing cells. */
+function fixClashes(index: number, newValue: number) {
+  const row = Math.floor(index / gridSize);
+  const col = index % gridSize;
+
+  for (let i = 0; i < gridSize; i++) {
+    // check along row
+    if (
+      getGridValue(row * gridSize + i) == newValue &&
+      row * gridSize + i != index
+    ) {
+      invalids.value[row * gridSize + i] -= 1;
+      invalids.value[index] -= 1;
+    }
+    // check along column
+    if (
+      getGridValue(gridSize * i + col) == newValue &&
+      gridSize * i + col != index
+    ) {
+      invalids.value[gridSize * i + col] -= 1;
+      invalids.value[index] -= 1;
+    }
+  }
+  // check along diagonals
+  for (let i = 1; i < gridSize; i++) {
+    if (row - i >= 0) {
+      if (col - i >= 0) {
+        if (getGridValue((row - i) * gridSize + (col - i)) == newValue) {
+          invalids.value[(row - i) * gridSize + (col - i)] -= 1;
+          invalids.value[index] -= 1;
+        }
+      }
+      if (col + i < gridSize) {
+        if (getGridValue((row - i) * gridSize + (col + i)) == newValue) {
+          invalids.value[(row - i) * gridSize + (col + i)] -= 1;
+          invalids.value[index] -= 1;
+        }
+      }
+    }
+    if (row + i < gridSize) {
+      if (col - i >= 0) {
+        if (getGridValue((row + i) * gridSize + (col - i)) == newValue) {
+          invalids.value[(row + i) * gridSize + (col - i)] -= 1;
+          invalids.value[index] -= 1;
+        }
+      }
+      if (col + i < gridSize) {
+        if (getGridValue((row + i) * gridSize + (col + i)) == newValue) {
+          invalids.value[(row + i) * gridSize + (col + i)] -= 1;
+          invalids.value[index] -= 1;
+        }
+      }
+    }
+  }
 }
 </script>
 
@@ -125,49 +263,49 @@ function findColour(index: number) {
           @click.exact="position = i"
         >
           <svg
-            v-if="get_grid_value(i) === 1"
+            v-if="getGridValue(i) === 1"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <One />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 2"
+            v-if="getGridValue(i) === 2"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <Two />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 3"
+            v-if="getGridValue(i) === 3"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <Three />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 4"
+            v-if="getGridValue(i) === 4"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <Four />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 5"
+            v-if="getGridValue(i) === 5"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <Five />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 6"
+            v-if="getGridValue(i) === 6"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
             <Six />
           </svg>
           <svg
-            v-if="get_grid_value(i) === 7"
+            v-if="getGridValue(i) === 7"
             viewBox="0 0 100 100"
             style="height: 60%; width: 60%; z-index: 2"
           >
@@ -179,6 +317,13 @@ function findColour(index: number) {
             style="height: 90%; width: 90%; z-index: 3"
           >
             <SelectBoxx :colour="grid[i] != 0 ? 'white' : '#d7e6ff'" />
+          </svg>
+          <svg
+            v-if="invalids[i] > 0"
+            viewBox="0 0 20 20"
+            style="height: 90%; width: 90%; z-index: 1"
+          >
+            <ErrorBox />
           </svg>
         </div>
       </div>
