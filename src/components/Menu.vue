@@ -42,9 +42,13 @@ function toggle(){
 }
 
 .menu {
+    display: flex;
   width: 40vw;
   height: 100vh;
   background-color: #DDDDDD;
+  border-right: 4px solid black;
+  justify-content: center;
+
 }
 
 </style>

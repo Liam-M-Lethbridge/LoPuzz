@@ -5,6 +5,7 @@
   import ErrorBox from "./components/icons/ErrorBox.vue";
   import XBox from "./components/icons/XBox.vue";
   import SelectBoxx from "./components/icons/SelectBoxx.vue";
+import Menu from "./components/Menu.vue";
 
   const gridSize = 6; 
   const valid_solution = ref<Boolean>(false);
@@ -353,6 +354,7 @@
 
 <template>
   <div class="background">
+    <Menu/>
     <!-- <button @click="newGrid"></button> -->
     <transition name="fade" @after-leave="onFadeComplete">
     <div class="square" v-show="valid_solution == false">
