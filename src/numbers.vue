@@ -16,16 +16,26 @@ var grid = ref<number[]>([]);
 var input = ref<number[]>([]);
 var invalids = ref<number[]>([]);
 var position = ref<number>(0);
-
+var valid_solution = ref<boolean>(false);
 /** This function asks the server to create a new grid and resets the relevant variables. */
 async function newGrid() {
   grid.value = await invoke("create_numbers_game", {
     gridSize: gridSize,
-    difficulty: 2,
+    difficulty: 0,
   });
   input = ref<number[]>(new Array(gridSize ** 2).fill(0));
   position = ref<number>(gridSize * gridSize);
   invalids = ref<number[]>(new Array(gridSize ** 2).fill(0));
+}
+
+/** This function checks if the grid is full and if the solution is valid */
+function checkGridFull() {
+  for (let i = 0; i < gridSize * gridSize; i++) {
+    if (getGridValue(i) == 0 || invalids.value[i] > 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /** This function toggles the value of the cell to a number.
@@ -37,10 +47,17 @@ function toggle(i: number, value: number) {
     fixClashes(i, getGridValue(i));
   }
   if (input.value[i] <= gridSize) {
-    input.value[i] = value;
+    if (input.value[i] == value) {
+      input.value[i] = 0;
+    } else {
+      input.value[i] = value;
+    }
   }
   if (getGridValue(i) != 0) {
     findClashes(i, getGridValue(i));
+  }
+  if (checkGridFull()) {
+    sendSolution();
   }
 }
 /** This function moves the selector icon to a different cell.
@@ -245,89 +262,106 @@ function fixClashes(index: number, newValue: number) {
     }
   }
 }
+async function onFadeComplete() {
+  await newGrid();
+  valid_solution.value = false;
+}
+/** This function sends the solution to the checker */
+async function sendSolution() {
+  var solution = [];
+  for (let i = 0; i < gridSize ** 2; i++) {
+    solution.push(getGridValue(i));
+  }
+  valid_solution.value = await invoke("compare_solutions_numbers", {
+    numbersGrid: grid.value,
+    size: gridSize,
+  });
+}
 </script>
 
 <template>
   <div class="background">
     <Menu />
-    <div class="square">
-      <div
-        class="grid"
-        :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }"
-      >
+    <transition name="fade" @after-leave="onFadeComplete">
+      <div class="square">
         <div
-          v-for="(cell, i) in grid"
-          :key="i"
-          class="cell"
-          :style="{ backgroundColor: findColour(i) }"
-          @click.exact="position = i"
+          class="grid"
+          :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }"
         >
-          <svg
-            v-if="getGridValue(i) === 1"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
+          <div
+            v-for="(cell, i) in grid"
+            :key="i"
+            class="cell"
+            :style="{ backgroundColor: findColour(i) }"
+            @click.exact="position = i"
           >
-            <One />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 2"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Two />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 3"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Three />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 4"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Four />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 5"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Five />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 6"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Six />
-          </svg>
-          <svg
-            v-if="getGridValue(i) === 7"
-            viewBox="0 0 100 100"
-            style="height: 60%; width: 60%; z-index: 2"
-          >
-            <Seven />
-          </svg>
-          <svg
-            v-if="position === i"
-            viewBox="0 0 20 20"
-            style="height: 90%; width: 90%; z-index: 3"
-          >
-            <SelectBoxx :colour="grid[i] != 0 ? 'white' : '#d7e6ff'" />
-          </svg>
-          <svg
-            v-if="invalids[i] > 0"
-            viewBox="0 0 20 20"
-            style="height: 90%; width: 90%; z-index: 1"
-          >
-            <ErrorBox />
-          </svg>
+            <svg
+              v-if="getGridValue(i) === 1"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <One />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 2"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Two />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 3"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Three />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 4"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Four />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 5"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Five />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 6"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Six />
+            </svg>
+            <svg
+              v-if="getGridValue(i) === 7"
+              viewBox="0 0 100 100"
+              style="height: 60%; width: 60%; z-index: 2"
+            >
+              <Seven />
+            </svg>
+            <svg
+              v-if="position === i"
+              viewBox="0 0 20 20"
+              style="height: 90%; width: 90%; z-index: 3"
+            >
+              <SelectBoxx :colour="grid[i] != 0 ? 'white' : '#d7e6ff'" />
+            </svg>
+            <svg
+              v-if="invalids[i] > 0"
+              viewBox="0 0 20 20"
+              style="height: 90%; width: 90%; z-index: 1"
+            >
+              <ErrorBox />
+            </svg>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -370,5 +404,15 @@ function fixClashes(index: number, newValue: number) {
   box-sizing: border-box;
   justify-content: center;
   align-items: center;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

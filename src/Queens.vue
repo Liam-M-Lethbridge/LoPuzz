@@ -82,7 +82,7 @@ async function send_solution() {
       queens_indices.push(i);
     }
   }
-  valid_solution.value = await invoke("compare_solutions", {
+  valid_solution.value = await invoke("compare_solutions_queens", {
     colourGrid: grid.value,
     solution: queens_indices,
     size: gridSize,
