@@ -140,7 +140,6 @@ fn compare_solutions_numbers(numbers_grid: Vec<u32>, size: u32) -> bool {
         let mut seen: HashSet<u32> = HashSet::new();
         for i in 0..size {
             if !seen.insert(numbers_grid[(row * size + i) as usize]) {
-                println!("row");
                 return false;
             }
         }
@@ -151,7 +150,6 @@ fn compare_solutions_numbers(numbers_grid: Vec<u32>, size: u32) -> bool {
         let mut seen: HashSet<u32> = HashSet::new();
         for i in 0..size {
             if !seen.insert(numbers_grid[(i * size + col) as usize]) {
-                println!("col");
                 return false;
             }
         }
@@ -167,7 +165,6 @@ fn compare_solutions_numbers(numbers_grid: Vec<u32>, size: u32) -> bool {
             let diff = row - col;
             if let Some(thing) = seen.get_mut(&diff) {
                 if !thing.insert(numbers_grid[(row * (size as i32) + col) as usize]) {
-                    println!("diag");
                     return false;
                 }
             }
@@ -184,18 +181,10 @@ fn compare_solutions_numbers(numbers_grid: Vec<u32>, size: u32) -> bool {
             let diff = row + col;
             if let Some(thing) = seen.get_mut(&diff) {
                 if !thing.insert(numbers_grid[(row * (size as i32) + col) as usize]) {
-                    println!("other diag");
                     return false;
                 }
             }
         }
     }
-    println!("YEAH");
     return true;
 }
-
-//  1   2   3   4   5
-//  1   2   3   4   5
-//  1   2   3   4   5
-//  1   2   3   4   5
-//  1   2   3   4   5
